@@ -16,10 +16,11 @@ public class ResourceInjectorCdiConfigurer extends AbstractCdiConfiguration {
 	}
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
+		Objects.requireNonNull(fileConfiguration);
 		// only one can be registered per configurer
 		configurer.configureResourceInjector(c -> new CdiResourceInjector(beanManager));
 	}

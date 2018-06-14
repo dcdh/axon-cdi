@@ -16,8 +16,6 @@ public @interface AggregateConfiguration {
 
 	Class<?> eventBus() default InheritQualifiers.class;
 
-	Class<?> commandBus() default InheritQualifiers.class;
-
 	Class<?> commandGateway() default InheritQualifiers.class;
 
 }

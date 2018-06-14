@@ -16,15 +16,16 @@ public abstract class AbstractCdiConfiguration implements AxonCdiConfigurer {
 		this.original = Objects.requireNonNull(original);
 	}
 
-	public Configurer setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	public Configurer setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
-		Configurer originalConfigurer = original.setUp(configurer, beanManager, executionContext);
-		concreateCdiSetUp(originalConfigurer, beanManager, executionContext);
+		Objects.requireNonNull(fileConfiguration);
+		final Configurer originalConfigurer = original.setUp(configurer, beanManager, executionContext, fileConfiguration);
+		concreateCdiSetUp(originalConfigurer, beanManager, executionContext, fileConfiguration);
 		return originalConfigurer;
 	};
 
-	protected abstract void concreateCdiSetUp(Configurer configurer, BeanManager beanManager, ExecutionContext executionContext) throws Exception;
+	protected abstract void concreateCdiSetUp(Configurer configurer, BeanManager beanManager, ExecutionContext executionContext, FileConfiguration fileConfiguration) throws Exception;
 
 }

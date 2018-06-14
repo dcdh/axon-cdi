@@ -11,10 +11,11 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
 public class AxonCdiConfigurationEntryPoint implements AxonCdiConfigurer {
 
 	@Override
-	public Configurer setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) {
+	public Configurer setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
+		Objects.requireNonNull(fileConfiguration);
 		return configurer;
 	}
 

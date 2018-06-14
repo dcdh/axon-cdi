@@ -1,16 +1,16 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Objects;
-import java.util.function.Function;
 
 import javax.enterprise.inject.spi.BeanManager;
 
-import org.axonframework.commandhandling.AggregateAnnotationCommandHandler;
-import org.axonframework.commandhandling.AnnotationCommandTargetResolver;
-import org.axonframework.config.Configuration;
+import org.axonframework.config.AggregateConfigurer;
 import org.axonframework.config.Configurer;
+import org.axonframework.eventsourcing.SnapshotTriggerDefinition;
 
-import com.damdamdeo.cdi.axonframework.aggregate.CustomAggregateAnnotationCommandHandler;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.AggregateRootBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
@@ -23,26 +23,44 @@ public class AggregatesCdiConfigurer extends AbstractCdiConfiguration {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
-		
+		Objects.requireNonNull(fileConfiguration);
+
 		for (AggregateRootBeanInfo aggregateRootBeanInfo : executionContext.aggregateRootBeanInfos()) {
-			AggregateConfigurerUsingProxies aggregateConf = AggregateConfigurerUsingProxies.defaultConfiguration(aggregateRootBeanInfo.type());
-			aggregateConf.configureCommandHandler(new Function<Configuration, AggregateAnnotationCommandHandler<?>>() {
-
-				@Override
-				public AggregateAnnotationCommandHandler<?> apply(final Configuration configuration) {
-					return new CustomAggregateAnnotationCommandHandler<>(aggregateConf.aggregateType(),
-							aggregateConf.repository(),
-							new AnnotationCommandTargetResolver(),
-							configuration.parameterResolverFactory());
-				}
-
-			});
+			AggregateConfigurer aggregateConf = AggregateConfigurer.defaultConfiguration(aggregateRootBeanInfo.type());
+			if (executionContext.hasAnEventStoreBean(beanManager)) {
+				SnapshotTriggerDefinition snapshotTriggerDefinition = (SnapshotTriggerDefinition) Proxy.newProxyInstance(
+					SnapshotTriggerDefinition.class.getClassLoader(),
+					new Class[] { SnapshotTriggerDefinition.class },
+					new SnapshotTriggerDefinitionInvocationHandler(beanManager, executionContext));
+				aggregateConf.configureSnapshotTrigger(c -> snapshotTriggerDefinition);
+			}
 			configurer.configureAggregate(aggregateConf);
 		}
+	}
+
+	private class SnapshotTriggerDefinitionInvocationHandler implements InvocationHandler {
+
+		private final BeanManager beanManager;
+		private final ExecutionContext executionContext;
+		private SnapshotTriggerDefinition snapshotTriggerDefinition;
+
+		public SnapshotTriggerDefinitionInvocationHandler(final BeanManager beanManager, final ExecutionContext executionContext) throws NoSuchMethodException, SecurityException {
+			this.beanManager = Objects.requireNonNull(beanManager);
+			this.executionContext = Objects.requireNonNull(executionContext);
+		}
+
+		@Override
+		public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+			if (snapshotTriggerDefinition == null) {
+				snapshotTriggerDefinition = executionContext.getSnapshotTriggerDefinitionReference(beanManager);
+			}
+			return method.invoke(snapshotTriggerDefinition, args);
+		}
+
 	}
 
 }

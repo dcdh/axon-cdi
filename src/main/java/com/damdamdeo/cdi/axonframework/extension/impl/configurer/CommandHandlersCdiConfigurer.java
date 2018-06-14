@@ -22,10 +22,11 @@ public class CommandHandlersCdiConfigurer extends AbstractCdiConfiguration {
 	}
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
+		Objects.requireNonNull(fileConfiguration);
 
 		// can't use lambda because of the checked exceptions thrown by *proxyCommandHandler.newInstance()*
 		for (final CommandHandlerBeanInfo commandHandlerBeanInfo: executionContext.commandHandlerBeanInfos()) {

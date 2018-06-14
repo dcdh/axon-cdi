@@ -15,10 +15,11 @@ public class PlatformTransactionManagerCdiConfigurer extends AbstractCdiConfigur
 	}
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
+		Objects.requireNonNull(fileConfiguration);
 		// Nothing to implement
 		// *PlatformTransactionManager* Spring specific interface
 		// The code is the same than TransactionManagerCdiConfigurer but specific for Spring

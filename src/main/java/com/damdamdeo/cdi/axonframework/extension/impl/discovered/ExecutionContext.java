@@ -20,18 +20,17 @@ import org.axonframework.messaging.correlation.CorrelationDataProvider;
 import org.axonframework.serialization.Serializer;
 
 import com.codahale.metrics.MetricRegistry;
-import com.damdamdeo.cdi.axonframework.extension.impl.bean.commandbus.CommandBusProxified;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.AggregateRootBeanInfo.QualifierType;
 
 public class ExecutionContext {
 
-	private List<AggregateRootBeanInfo> aggregateRootBeanInfos = new ArrayList<>();
+	private final List<AggregateRootBeanInfo> aggregateRootBeanInfos = new ArrayList<>();
 
-	private List<SagaBeanInfo> sagaBeanInfos = new ArrayList<>();
+	private final List<SagaBeanInfo> sagaBeanInfos = new ArrayList<>();
 
-	private List<CommandHandlerBeanInfo> commandHandlerBeanInfos = new ArrayList<>();
+	private final List<CommandHandlerBeanInfo> commandHandlerBeanInfos = new ArrayList<>();
 
-	private List<EventHandlerBeanInfo> eventHandlerBeanInfos = new ArrayList<>();
+	private final List<EventHandlerBeanInfo> eventHandlerBeanInfos = new ArrayList<>();
 
 	private final MetricRegistry metricRegistry;
 
@@ -98,10 +97,6 @@ public class ExecutionContext {
 		return aggregateRootBeanInfos.get(0).qualifiers(QualifierType.COMMAND_GATEWAY);
 	}
 
-	public Set<Annotation> commandBusQualifiers() {
-		return aggregateRootBeanInfos.get(0).qualifiers(QualifierType.COMMAND_BUS);
-	}
-
 	public Set<Annotation> eventSchedulerQualifiers() {
 		return aggregateRootBeanInfos.get(0).qualifiers(QualifierType.EVENT_SCHEDULER);
 	}
@@ -118,11 +113,6 @@ public class ExecutionContext {
 	public boolean hasACommandGatewayBean(final BeanManager beanManager) {
 		Objects.requireNonNull(beanManager);
 		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.COMMAND_GATEWAY);
-	}
-
-	public boolean hasACommandBusBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.COMMAND_BUS);
 	}
 
 	public boolean hasAnEventStoreBean(final BeanManager beanManager) {
@@ -155,9 +145,9 @@ public class ExecutionContext {
 		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.CORRELATION_DATA_PROVIDER);
 	}
 
-	public CommandBusProxified getCommandBusReference(final BeanManager beanManager) {
+	public boolean hasASnapshotteTriggerDefinitionBean(final BeanManager beanManager) {
 		Objects.requireNonNull(beanManager);
-		return (CommandBusProxified) aggregateRootBeanInfos.get(0).getReference(beanManager, QualifierType.COMMAND_BUS);
+		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.SNAPSHOTTER_TRIGGER_DEFINITION);
 	}
 
 	// EventStore extends EventBus

@@ -19,17 +19,18 @@ public class EventStorageEngineCdiConfigurer extends AbstractCdiConfiguration {
 	}
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
+		Objects.requireNonNull(fileConfiguration);
 		if (executionContext.hasAnEventStorageEngineBean(beanManager)) {
 			EventStorageEngine eventStorageEngine = (EventStorageEngine) Proxy.newProxyInstance(
 				EventStorageEngine.class.getClassLoader(),
 				new Class[] { EventStorageEngine.class },
 				new EventStorageEngineInvocationHandler(beanManager, executionContext));
 			// only one can be registered by configurer
-			configurer.configureEmbeddedEventStore(c -> eventStorageEngine);			
+			configurer.configureEmbeddedEventStore(c -> eventStorageEngine);
 		}
 	}
 

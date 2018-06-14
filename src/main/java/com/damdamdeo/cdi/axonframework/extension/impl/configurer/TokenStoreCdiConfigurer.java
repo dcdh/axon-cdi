@@ -22,10 +22,11 @@ public class TokenStoreCdiConfigurer extends AbstractCdiConfiguration {
 	}
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
+		Objects.requireNonNull(fileConfiguration);
 		if (executionContext.hasATokenStoreBean(beanManager)) {
 			Class<? extends TokenStore> proxyTokenStore = new ByteBuddy()
 				.subclass(TokenStore.class)

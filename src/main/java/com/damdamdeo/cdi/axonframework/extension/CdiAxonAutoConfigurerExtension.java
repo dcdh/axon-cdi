@@ -1,5 +1,6 @@
 package com.damdamdeo.cdi.axonframework.extension;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -15,6 +16,8 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.common.transaction.TransactionManager;
@@ -37,7 +40,6 @@ import com.damdamdeo.cdi.axonframework.extension.impl.bean.CommandGatewayBeanCre
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.EventSchedulerBeanCreation;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.EventStoreBeanCreation;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.MetricRegistryBeanCreation;
-import com.damdamdeo.cdi.axonframework.extension.impl.bean.SnapshotterBeanCreation;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.validation.ApplicationScopedBeanValidator;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.validation.BeanScopeNotValidException;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.validation.BeanScopeValidator;
@@ -52,6 +54,7 @@ import com.damdamdeo.cdi.axonframework.extension.impl.configurer.CorrelationData
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EventBusCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EventHandlersCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EventStorageEngineCdiConfigurer;
+import com.damdamdeo.cdi.axonframework.extension.impl.configurer.FileConfiguration;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.MetricRegistryCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.ParameterResolverCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.PlatformTransactionManagerCdiConfigurer;
@@ -61,6 +64,8 @@ import com.damdamdeo.cdi.axonframework.extension.impl.configurer.SerializerCdiCo
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.SnapshotterTriggerDefinitionCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.TokenStoreCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.TransactionManagerCdiConfigurer;
+import com.damdamdeo.cdi.axonframework.extension.impl.configurer.UnavailableConfiguration;
+import com.damdamdeo.cdi.axonframework.extension.impl.configurer.YamlConfiguration;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.AggregateRootBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.CommandHandlerBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.EventHandlerBeanInfo;
@@ -68,6 +73,8 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.SagaBeanInfo;
 import com.damdamdeo.cdi.axonframework.support.AxonUtils;
 import com.damdamdeo.cdi.axonframework.support.BeforeStartingAxon;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
  * Original: SpringAxonAutoConfigurer
@@ -143,6 +150,18 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 	 */
 	<T> void afterBeanDiscovery(@Observes final AfterBeanDiscovery afterBeanDiscovery, final BeanManager beanManager) throws Exception {
 		LOGGER.log(Level.INFO, "Axon CDI Extension - Activated");
+		// load yaml configuration
+		final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+		FileConfiguration fileConfiguration;
+		try {
+			fileConfiguration = mapper.readValue(new File("configuration.yaml"), YamlConfiguration.class);
+			LOGGER.log(Level.INFO, "Loaded conf:");
+			LOGGER.log(Level.INFO, ReflectionToStringBuilder.toString(fileConfiguration, ToStringStyle.MULTI_LINE_STYLE));
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Unable to load conf - using default configuration: " + e.getMessage());
+			fileConfiguration = new UnavailableConfiguration();
+		}
+
 		// Scoped validations
 		BeanScopeValidator beanScopeValidator = new ApplicationScopedBeanValidator(
 			new ApplicationScopedBeanValidator(
@@ -216,25 +235,24 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 																		new ParameterResolverCdiConfigurer(
 																			new SnapshotterTriggerDefinitionCdiConfigurer(
 																				new AxonCdiConfigurationEntryPoint()))))))))))))))));
-			Configurer configurer = axonCdiConfiguration.setUp(DefaultConfigurer.defaultConfiguration(), beanManager, executionContext);
+			Configurer configurer = axonCdiConfiguration.setUp(DefaultConfigurer.defaultConfiguration(), beanManager, executionContext, fileConfiguration);
 			// create *configuration* from previous setup configurer
 			Configuration configuration = configurer.buildConfiguration();
 			// Create cdi bean from configuration (repositories, event handlers, command handlers, event schedulers, command gateway)
 			BeansCreationHandler beansCreation =
 				new MetricRegistryBeanCreation(
-					new SnapshotterBeanCreation(
-						new CommandGatewayBeanCreation(
-							new EventSchedulerBeanCreation(
-								new AggregatesRootRepositoriesBeansCreation(
-									new EventStoreBeanCreation(
-										new BeanCreationEntryPoint()))))));
+					new CommandGatewayBeanCreation(
+						new EventSchedulerBeanCreation(
+							new AggregatesRootRepositoriesBeansCreation(
+								new EventStoreBeanCreation(
+									new BeanCreationEntryPoint())))));
 			beansCreation.create(afterBeanDiscovery, beanManager, executionContext, configuration);
 			configurations.add(configuration);
 		}
 	}
 
 	/**
-	 * 
+	 * Start everythings
 	 * @param afterDeploymentValidation
 	 * @param beanManager
 	 */

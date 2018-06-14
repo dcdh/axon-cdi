@@ -25,7 +25,6 @@ import org.axonframework.messaging.correlation.CorrelationDataProvider;
 import org.axonframework.serialization.Serializer;
 
 import com.damdamdeo.cdi.axonframework.AggregateConfiguration;
-import com.damdamdeo.cdi.axonframework.extension.impl.bean.commandbus.CommandBusProxified;
 import com.damdamdeo.cdi.axonframework.support.AxonUtils;
 import com.damdamdeo.cdi.axonframework.support.CdiUtils;
 
@@ -34,7 +33,6 @@ public class AggregateRootBeanInfo {
 	public static enum QualifierType {
 
 		DEFAULT(Object.class),
-		COMMAND_BUS(CommandBusProxified.class),
 		COMMAND_GATEWAY(CommandGateway.class),
 		EVENT_BUS(EventBus.class),
 		SNAPSHOTTER_TRIGGER_DEFINITION(SnapshotTriggerDefinition.class),
@@ -90,8 +88,7 @@ public class AggregateRootBeanInfo {
 
 	public boolean isSameContext(final AggregateRootBeanInfo aggregateRootBeanInfo) {
 		Objects.requireNonNull(aggregateRootBeanInfo);
-		return qualifiers.get(QualifierType.COMMAND_BUS).equals(aggregateRootBeanInfo.qualifiers(QualifierType.COMMAND_BUS))
-				&& qualifiers.get(QualifierType.COMMAND_GATEWAY).equals(aggregateRootBeanInfo.qualifiers(QualifierType.COMMAND_GATEWAY))
+		return qualifiers.get(QualifierType.COMMAND_GATEWAY).equals(aggregateRootBeanInfo.qualifiers(QualifierType.COMMAND_GATEWAY))
 				&& qualifiers.get(QualifierType.EVENT_BUS).equals(aggregateRootBeanInfo.qualifiers(QualifierType.EVENT_BUS));
 	}
 
@@ -102,7 +99,7 @@ public class AggregateRootBeanInfo {
 
 	public boolean isSameContext(final CommandHandlerBeanInfo commandHandlerBeanInfo) {
 		Objects.requireNonNull(commandHandlerBeanInfo);
-		return qualifiers.get(QualifierType.COMMAND_BUS).equals(commandHandlerBeanInfo.normalizedQualifiers());
+		return qualifiers.get(QualifierType.COMMAND_GATEWAY).equals(commandHandlerBeanInfo.normalizedQualifiers());
 	}
 
 	public boolean isSameContext(final EventHandlerBeanInfo eventHandlerBeanInfo) {
@@ -148,8 +145,7 @@ public class AggregateRootBeanInfo {
 		Map<QualifierType, Set<Annotation>> qualifiers = new HashMap<>();
 		Class<?> fallback = CdiUtils.isInheritMarker(aggregateConfiguration.value()) ? aggregateType : aggregateConfiguration.value();
 		addQualifiers(beanManager, qualifiers, QualifierType.DEFAULT, aggregateConfiguration.value(), fallback);
-		addQualifiers(beanManager, qualifiers, QualifierType.COMMAND_BUS, aggregateConfiguration.commandBus(), fallback);
-		addQualifiers(beanManager, qualifiers, QualifierType.COMMAND_GATEWAY, aggregateConfiguration.commandBus(), fallback);
+		addQualifiers(beanManager, qualifiers, QualifierType.COMMAND_GATEWAY, aggregateConfiguration.commandGateway(), fallback);
 		addQualifiers(beanManager, qualifiers, QualifierType.EVENT_BUS, aggregateConfiguration.eventBus(), fallback);
 
 		// These qualifiers use only default value because only one instance (or multiple instances having the same interface and the same qualifier)

@@ -28,17 +28,20 @@ public class SnapshotterTriggerDefinitionCdiConfigurer extends AbstractCdiConfig
 	}
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext)
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration)
 			throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
-		SnapshotTriggerDefinition snapshotTriggerDefinition = (SnapshotTriggerDefinition) Proxy.newProxyInstance(
-			SnapshotTriggerDefinition.class.getClassLoader(),
-			new Class[] { SnapshotTriggerDefinition.class },
-			new SnapshotTriggerDefinitionInvocationHandler(beanManager, executionContext));
-		// only one can be registered per configurer
-		configurer.registerComponent(SnapshotTriggerDefinition.class, c -> snapshotTriggerDefinition);
+		Objects.requireNonNull(fileConfiguration);
+		if (executionContext.hasASnapshotteTriggerDefinitionBean(beanManager)) {
+			SnapshotTriggerDefinition snapshotTriggerDefinition = (SnapshotTriggerDefinition) Proxy.newProxyInstance(
+					SnapshotTriggerDefinition.class.getClassLoader(),
+					new Class[] { SnapshotTriggerDefinition.class },
+					new SnapshotTriggerDefinitionInvocationHandler(beanManager, executionContext));
+			// only one can be registered per configurer
+			configurer.registerComponent(SnapshotTriggerDefinition.class, c -> snapshotTriggerDefinition);
+		}
 	}
 
 	private class SnapshotTriggerDefinitionInvocationHandler implements InvocationHandler {

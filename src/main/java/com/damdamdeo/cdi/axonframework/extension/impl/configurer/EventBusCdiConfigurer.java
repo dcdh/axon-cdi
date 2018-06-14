@@ -4,12 +4,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
-import java.util.concurrent.Executors;
 
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.axonframework.config.Configurer;
-import org.axonframework.eventhandling.scheduling.java.SimpleEventScheduler;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
@@ -22,10 +20,11 @@ public class EventBusCdiConfigurer extends AbstractCdiConfiguration {
 	}
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
+		Objects.requireNonNull(fileConfiguration);
 		if (executionContext.hasAnEventStoreBean(beanManager)) {
 			// must cast to EventStore
 			// or "c.eventBus() instanceof EventStore" in AggregateConfigurer will return false and throw an exception
@@ -34,8 +33,6 @@ public class EventBusCdiConfigurer extends AbstractCdiConfiguration {
 					new Class[] { EventStore.class },
 					new EventStoreInvocationHandler(beanManager, executionContext));
 			configurer.configureEventBus(c -> eventStore);
-			// I don't know where to init EventScheduler ... so I do it here
-			new SimpleEventScheduler(Executors.newSingleThreadScheduledExecutor(), eventStore);
 		}
 	}
 

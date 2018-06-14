@@ -20,10 +20,11 @@ public class CorrelationDataProviderCdiConfigurer extends AbstractCdiConfigurati
 	}
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
+		Objects.requireNonNull(fileConfiguration);
 		if (executionContext.hasACorrelationDataProviderBean(beanManager)) {
 			Serializer serializer = (Serializer) Proxy.newProxyInstance(
 				Serializer.class.getClassLoader(),

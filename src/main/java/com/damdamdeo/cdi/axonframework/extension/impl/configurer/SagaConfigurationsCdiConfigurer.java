@@ -24,10 +24,11 @@ public class SagaConfigurationsCdiConfigurer extends AbstractCdiConfiguration {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext) throws Exception {
+	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
+		Objects.requireNonNull(fileConfiguration);
 		executionContext.sagaBeanInfos()
 			.stream()
 			.forEach(sagaBeanInfo -> {
