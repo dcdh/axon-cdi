@@ -154,7 +154,7 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 		final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 		FileConfiguration fileConfiguration;
 		try {
-			fileConfiguration = mapper.readValue(new File("configuration.yaml"), YamlConfiguration.class);
+			fileConfiguration = mapper.readValue(this.getClass().getResourceAsStream("/configuration.yaml"), YamlConfiguration.class);
 			LOGGER.log(Level.INFO, "Loaded conf:");
 			LOGGER.log(Level.INFO, ReflectionToStringBuilder.toString(fileConfiguration, ToStringStyle.MULTI_LINE_STYLE));
 		} catch (Exception e) {

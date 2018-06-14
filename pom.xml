@@ -33,13 +33,11 @@
 			<groupId>org.axonframework</groupId>
 			<artifactId>axon-core</artifactId>
 			<version>${version.axonframework}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.axonframework</groupId>
 			<artifactId>axon-metrics</artifactId>
 			<version>${version.axonframework}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.eaio.uuid</groupId>
