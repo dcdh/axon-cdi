@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.BeanManager;
 
@@ -13,6 +15,8 @@ import org.axonframework.serialization.Serializer;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
 public class SerializerCdiConfigurer extends AbstractCdiConfiguration {
+
+	private static final Logger LOGGER = Logger.getLogger(SerializerCdiConfigurer.class.getName());
 
 	public SerializerCdiConfigurer(final AxonCdiConfigurer original) {
 		super(original);
@@ -31,6 +35,8 @@ public class SerializerCdiConfigurer extends AbstractCdiConfiguration {
 				new SerializerInvocationHandler(beanManager, executionContext));
 			// only one can be registered per configurer
 			configurer.configureSerializer(c -> serializer);
+		} else {
+			LOGGER.log(Level.INFO, "Serializer - none defined, using XStreamSerializer as default one");
 		}
 	}
 

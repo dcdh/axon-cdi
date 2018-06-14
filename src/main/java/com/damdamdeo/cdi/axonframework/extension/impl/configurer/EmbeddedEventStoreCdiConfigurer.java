@@ -4,17 +4,22 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.axonframework.config.Configurer;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
+import org.axonframework.eventsourcing.eventstore.inmemory.InMemoryEventStorageEngine;
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
-public class EventStorageEngineCdiConfigurer extends AbstractCdiConfiguration {
+public class EmbeddedEventStoreCdiConfigurer extends AbstractCdiConfiguration {
 
-	public EventStorageEngineCdiConfigurer(final AxonCdiConfigurer original) {
+	private static final Logger LOGGER = Logger.getLogger(EmbeddedEventStoreCdiConfigurer.class.getName());
+
+	public EmbeddedEventStoreCdiConfigurer(final AxonCdiConfigurer original) {
 		super(original);
 	}
 
@@ -31,6 +36,10 @@ public class EventStorageEngineCdiConfigurer extends AbstractCdiConfiguration {
 				new EventStorageEngineInvocationHandler(beanManager, executionContext));
 			// only one can be registered by configurer
 			configurer.configureEmbeddedEventStore(c -> eventStorageEngine);
+		} else {
+			// default InMemoryEventStorageEngine...
+			LOGGER.log(Level.WARNING, "EventStore - none defined, using EmbeddedEventStore with InMemoryEventStorageEngine");
+			configurer.configureEmbeddedEventStore(c -> new InMemoryEventStorageEngine());
 		}
 	}
 
@@ -38,23 +47,17 @@ public class EventStorageEngineCdiConfigurer extends AbstractCdiConfiguration {
 
 		private final BeanManager beanManager;
 		private final ExecutionContext executionContext;
-		private final Method toStringMethod;
 		private EventStorageEngine eventStorageEngine;
 
 		public EventStorageEngineInvocationHandler(final BeanManager beanManager, final ExecutionContext executionContext) throws NoSuchMethodException, SecurityException {
 			this.beanManager = Objects.requireNonNull(beanManager);
 			this.executionContext = Objects.requireNonNull(executionContext);
-			this.toStringMethod = Object.class.getMethod("toString");
 		}
 
 		@Override
 		public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
 			if (eventStorageEngine == null) {
 				eventStorageEngine = executionContext.getEventStorageEngineReference(beanManager);
-			}
-			if (method.equals(toStringMethod)) {
-				// eventStorageEngine is proxified by weld
-				return eventStorageEngine.toString().substring(0, eventStorageEngine.toString().indexOf("@"));
 			}
 			return method.invoke(eventStorageEngine, args);
 		}

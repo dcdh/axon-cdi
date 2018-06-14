@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.BeanManager;
 
@@ -14,6 +16,8 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
 
 // cf. DefaultConfigurerTest: EntityManagerTransactionManager
 public class TransactionManagerCdiConfigurer extends AbstractCdiConfiguration {
+
+	private static final Logger LOGGER = Logger.getLogger(TransactionManagerCdiConfigurer.class.getName());
 
 	public TransactionManagerCdiConfigurer(final AxonCdiConfigurer original) {
 		super(original);
@@ -32,6 +36,8 @@ public class TransactionManagerCdiConfigurer extends AbstractCdiConfiguration {
 				new TransactionManagerInvocationHandler(beanManager, executionContext));
 			// only one can be registered per configurer
 			configurer.configureTransactionManager(c -> transactionManager);
+		} else {
+			LOGGER.log(Level.INFO, "TransactionManager - none defined");
 		}
 	}
 

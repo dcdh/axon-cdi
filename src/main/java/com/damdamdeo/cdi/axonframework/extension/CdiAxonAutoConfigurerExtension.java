@@ -1,6 +1,5 @@
 package com.damdamdeo.cdi.axonframework.extension;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -51,9 +50,8 @@ import com.damdamdeo.cdi.axonframework.extension.impl.configurer.AxonCdiConfigur
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.CommandBusCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.CommandHandlersCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.CorrelationDataProviderCdiConfigurer;
-import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EventBusCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EventHandlersCdiConfigurer;
-import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EventStorageEngineCdiConfigurer;
+import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EmbeddedEventStoreCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.FileConfiguration;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.MetricRegistryCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.ParameterResolverCdiConfigurer;
@@ -230,11 +228,10 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 													new TokenStoreCdiConfigurer(
 														new SerializerCdiConfigurer(
 															new CommandBusCdiConfigurer(
-																new EventStorageEngineCdiConfigurer(
-																	new EventBusCdiConfigurer(
-																		new ParameterResolverCdiConfigurer(
-																			new SnapshotterTriggerDefinitionCdiConfigurer(
-																				new AxonCdiConfigurationEntryPoint()))))))))))))))));
+																new EmbeddedEventStoreCdiConfigurer(
+																	new ParameterResolverCdiConfigurer(
+																		new SnapshotterTriggerDefinitionCdiConfigurer(
+																			new AxonCdiConfigurationEntryPoint())))))))))))))));
 			Configurer configurer = axonCdiConfiguration.setUp(DefaultConfigurer.defaultConfiguration(), beanManager, executionContext, fileConfiguration);
 			// create *configuration* from previous setup configurer
 			Configuration configuration = configurer.buildConfiguration();

@@ -1,6 +1,8 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.BeanManager;
 
@@ -25,6 +27,8 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
  */
 public class CommandBusCdiConfigurer extends AbstractCdiConfiguration {
 
+	private static final Logger LOGGER = Logger.getLogger(CommandBusCdiConfigurer.class.getName());
+
 	public CommandBusCdiConfigurer(final AxonCdiConfigurer original) {
 		super(original);
 	}
@@ -35,6 +39,7 @@ public class CommandBusCdiConfigurer extends AbstractCdiConfiguration {
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
 		Objects.requireNonNull(fileConfiguration);
+		LOGGER.log(Level.INFO, String.format("CommandBus - using '%s'", fileConfiguration.commandBus()));
 		switch (fileConfiguration.commandBus()) {
 		case SIMPLE:
 			// nothing to do. By default SimpleCommandBus is used.

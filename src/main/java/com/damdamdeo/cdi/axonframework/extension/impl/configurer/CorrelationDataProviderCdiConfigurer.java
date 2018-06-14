@@ -3,17 +3,21 @@ package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.axonframework.config.Configurer;
 import org.axonframework.messaging.correlation.CorrelationDataProvider;
-import org.axonframework.serialization.Serializer;
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
 public class CorrelationDataProviderCdiConfigurer extends AbstractCdiConfiguration {
+
+	private static final Logger LOGGER = Logger.getLogger(CorrelationDataProviderCdiConfigurer.class.getName());
 
 	public CorrelationDataProviderCdiConfigurer(final AxonCdiConfigurer original) {
 		super(original);
@@ -26,12 +30,14 @@ public class CorrelationDataProviderCdiConfigurer extends AbstractCdiConfigurati
 		Objects.requireNonNull(executionContext);
 		Objects.requireNonNull(fileConfiguration);
 		if (executionContext.hasACorrelationDataProviderBean(beanManager)) {
-			Serializer serializer = (Serializer) Proxy.newProxyInstance(
-				Serializer.class.getClassLoader(),
-				new Class[] { Serializer.class },
+			CorrelationDataProvider correlationDataProvider = (CorrelationDataProvider) Proxy.newProxyInstance(
+				CorrelationDataProvider.class.getClassLoader(),
+				new Class[] { CorrelationDataProvider.class },
 				new CorrelationDataProviderInvocationHandler(beanManager, executionContext));
 			// only one can be registered per configurer
-			configurer.configureSerializer(c -> serializer);
+			configurer.configureCorrelationDataProviders(c -> Collections.singletonList(correlationDataProvider));
+		} else {
+			LOGGER.log(Level.INFO, "CorrelationDataProvider - none defined, using default one");
 		}
 	}
 

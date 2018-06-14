@@ -3,11 +3,14 @@ package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.axonframework.config.Configurer;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
+import org.axonframework.eventhandling.tokenstore.inmemory.InMemoryTokenStore;
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
@@ -16,6 +19,8 @@ import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.matcher.ElementMatchers;
 
 public class TokenStoreCdiConfigurer extends AbstractCdiConfiguration {
+
+	private static final Logger LOGGER = Logger.getLogger(TokenStoreCdiConfigurer.class.getName());
 
 	public TokenStoreCdiConfigurer(final AxonCdiConfigurer original) {
 		super(original);
@@ -37,6 +42,10 @@ public class TokenStoreCdiConfigurer extends AbstractCdiConfiguration {
 				.getLoaded();
 			TokenStore instanceTokenStore = proxyTokenStore.newInstance();
 			configurer.registerComponent(TokenStore.class, c -> instanceTokenStore);
+		} else {
+			// default in memory
+			LOGGER.log(Level.WARNING, "TokenStore - none defined, using InMemoryTokenStore");
+			configurer.registerComponent(TokenStore.class, c -> new InMemoryTokenStore());
 		}
 	}
 

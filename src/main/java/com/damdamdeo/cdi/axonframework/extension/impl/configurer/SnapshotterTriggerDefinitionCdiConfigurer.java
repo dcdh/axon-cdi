@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.BeanManager;
 
@@ -20,8 +22,11 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
  * => Register as a component
  * @author damien
  *
+ * cf. org.axonframework.config.AggregateConfigurer<A>
  */
 public class SnapshotterTriggerDefinitionCdiConfigurer extends AbstractCdiConfiguration {
+
+	private static final Logger LOGGER = Logger.getLogger(SnapshotterTriggerDefinitionCdiConfigurer.class.getName());
 
 	public SnapshotterTriggerDefinitionCdiConfigurer(final AxonCdiConfigurer original) {
 		super(original);
@@ -41,6 +46,8 @@ public class SnapshotterTriggerDefinitionCdiConfigurer extends AbstractCdiConfig
 					new SnapshotTriggerDefinitionInvocationHandler(beanManager, executionContext));
 			// only one can be registered per configurer
 			configurer.registerComponent(SnapshotTriggerDefinition.class, c -> snapshotTriggerDefinition);
+		} else {
+			LOGGER.log(Level.WARNING, "SnapshotterTriggerDefinition - none defined, using NoSnapshotTriggerDefinition");
 		}
 	}
 

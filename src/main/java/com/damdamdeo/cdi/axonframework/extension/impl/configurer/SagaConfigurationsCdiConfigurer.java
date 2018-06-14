@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -16,7 +18,10 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.SagaBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.SagaBeanInfo.QualifierType;
 
+// cf. https://docs.axonframework.org/part-ii-domain-logic/sagas
 public class SagaConfigurationsCdiConfigurer extends AbstractCdiConfiguration {
+
+	private static final Logger LOGGER = Logger.getLogger(SagaConfigurationsCdiConfigurer.class.getName());
 
 	public SagaConfigurationsCdiConfigurer(final AxonCdiConfigurer original) {
 		super(original);
@@ -40,8 +45,10 @@ public class SagaConfigurationsCdiConfigurer extends AbstractCdiConfiguration {
 						SagaStore.class.getClassLoader(),
 						new Class[] { SagaStore.class },
 						new SagaStoreInvocationHandler(beanManager, sagaBeanInfo)));
-					SagaConfiguration.trackingSagaManager(sagaBeanInfo.type());
+				} else {
+					LOGGER.log(Level.INFO, "Serializer - none defined, using InMemorySagaStore as default one");
 				}
+				SagaConfiguration.trackingSagaManager(sagaBeanInfo.type());
 				configurer.registerModule(sagaConfiguration);
 			});
 	}
