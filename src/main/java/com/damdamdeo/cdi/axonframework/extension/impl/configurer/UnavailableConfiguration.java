@@ -9,4 +9,16 @@ public class UnavailableConfiguration implements FileConfiguration {
 		return CommandBusToUse.SIMPLE;
 	}
 
+	@Override
+	public EventCountSnapshotTriggerDefinition eventCountSnapshotTriggerDefinition() {
+		return new EventCountSnapshotTriggerDefinition() {
+
+			@Override
+			public Integer threshold() {
+				return 3;
+			}
+
+		};
+	}
+
 }

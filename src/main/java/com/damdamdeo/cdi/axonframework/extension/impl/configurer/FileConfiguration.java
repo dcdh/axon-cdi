@@ -6,4 +6,12 @@ public interface FileConfiguration {
 
 	CommandBusToUse commandBus();
 
+	EventCountSnapshotTriggerDefinition eventCountSnapshotTriggerDefinition();
+
+	interface EventCountSnapshotTriggerDefinition {
+
+		Integer threshold();
+
+	}
+
 }

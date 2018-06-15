@@ -19,7 +19,6 @@ import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.EventBus;
 import org.axonframework.eventhandling.scheduling.EventScheduler;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
-import org.axonframework.eventsourcing.SnapshotTriggerDefinition;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.messaging.correlation.CorrelationDataProvider;
 import org.axonframework.serialization.Serializer;
@@ -35,7 +34,6 @@ public class AggregateRootBeanInfo {
 		DEFAULT(Object.class),
 		COMMAND_GATEWAY(CommandGateway.class),
 		EVENT_BUS(EventBus.class),
-		SNAPSHOTTER_TRIGGER_DEFINITION(SnapshotTriggerDefinition.class),
 		TOKEN_STORE(TokenStore.class),
 		TRANSACTION_MANAGER(TransactionManager.class),
 		SERIALIZER(Serializer.class),
@@ -150,7 +148,6 @@ public class AggregateRootBeanInfo {
 
 		// These qualifiers use only default value because only one instance (or multiple instances having the same interface and the same qualifier)
 		// can be defined per configurer
-		addQualifiers(beanManager, qualifiers, QualifierType.SNAPSHOTTER_TRIGGER_DEFINITION, aggregateConfiguration.value(), fallback);
 		addQualifiers(beanManager, qualifiers, QualifierType.TOKEN_STORE, aggregateConfiguration.value(), fallback);
 		addQualifiers(beanManager, qualifiers, QualifierType.TRANSACTION_MANAGER, aggregateConfiguration.value(), fallback);
 		addQualifiers(beanManager, qualifiers, QualifierType.SERIALIZER, aggregateConfiguration.value(), fallback);

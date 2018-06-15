@@ -59,7 +59,6 @@ import com.damdamdeo.cdi.axonframework.extension.impl.configurer.PlatformTransac
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.ResourceInjectorCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.SagaConfigurationsCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.SerializerCdiConfigurer;
-import com.damdamdeo.cdi.axonframework.extension.impl.configurer.SnapshotterTriggerDefinitionCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.TokenStoreCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.TransactionManagerCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.UnavailableConfiguration;
@@ -230,8 +229,7 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 															new CommandBusCdiConfigurer(
 																new EmbeddedEventStoreCdiConfigurer(
 																	new ParameterResolverCdiConfigurer(
-																		new SnapshotterTriggerDefinitionCdiConfigurer(
-																			new AxonCdiConfigurationEntryPoint())))))))))))))));
+																		new AxonCdiConfigurationEntryPoint()))))))))))))));
 			Configurer configurer = axonCdiConfiguration.setUp(DefaultConfigurer.defaultConfiguration(), beanManager, executionContext, fileConfiguration);
 			// create *configuration* from previous setup configurer
 			Configuration configuration = configurer.buildConfiguration();

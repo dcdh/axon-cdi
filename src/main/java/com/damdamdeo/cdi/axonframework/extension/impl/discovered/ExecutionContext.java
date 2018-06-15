@@ -13,7 +13,6 @@ import org.apache.commons.lang3.Validate;
 import org.axonframework.commandhandling.model.AggregateRoot;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
-import org.axonframework.eventsourcing.SnapshotTriggerDefinition;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.axonframework.messaging.correlation.CorrelationDataProvider;
@@ -101,10 +100,6 @@ public class ExecutionContext {
 		return aggregateRootBeanInfos.get(0).qualifiers(QualifierType.EVENT_SCHEDULER);
 	}
 
-	public Set<Annotation> snapshotterTriggerDefinitionQualifiers() {
-		return aggregateRootBeanInfos.get(0).qualifiers(QualifierType.SNAPSHOTTER_TRIGGER_DEFINITION);
-	}
-
 	public boolean hasAnEventSchedulerBean(final BeanManager beanManager) {
 		Objects.requireNonNull(beanManager);
 		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.EVENT_SCHEDULER);
@@ -145,11 +140,6 @@ public class ExecutionContext {
 		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.CORRELATION_DATA_PROVIDER);
 	}
 
-	public boolean hasASnapshotteTriggerDefinitionBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.SNAPSHOTTER_TRIGGER_DEFINITION);
-	}
-
 	// EventStore extends EventBus
 	public EventStore getEventStoreReference(final BeanManager beanManager) {
 		Objects.requireNonNull(beanManager);
@@ -169,11 +159,6 @@ public class ExecutionContext {
 	public TokenStore getTokenStoreReference(final BeanManager beanManager) {
 		Objects.requireNonNull(beanManager);
 		return (TokenStore) aggregateRootBeanInfos.get(0).getReference(beanManager, QualifierType.TOKEN_STORE);
-	}
-
-	public SnapshotTriggerDefinition getSnapshotTriggerDefinitionReference(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return (SnapshotTriggerDefinition) aggregateRootBeanInfos.get(0).getReference(beanManager, QualifierType.SNAPSHOTTER_TRIGGER_DEFINITION);
 	}
 
 	public Serializer getSerializerReference(final BeanManager beanManager) {
