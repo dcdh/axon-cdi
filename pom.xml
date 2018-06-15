@@ -27,6 +27,54 @@
 		<version.fasterxml>2.9.6</version.fasterxml>
 	</properties>
 
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/kamaladafrica/axon-cdi/issues</url>
+	</issueManagement>
+	<inceptionYear>2015</inceptionYear>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<prerequisites>
+		<maven>3.0.3</maven>
+	</prerequisites>
+	<scm>
+		<connection>scm:git:https://github.com/kamaladafrica/axon-cdi.git</connection>
+		<developerConnection>scm:git:https://github.com/kamaladafrica/axon-cdi.git</developerConnection>
+		<url>https://github.com/kamaladafrica/axon-cdi</url>
+		<tag>HEAD</tag>
+	</scm>
+	<developers>
+		<developer>
+			<id>kamaladafrica</id>
+			<name>Alessio D'Innocenti</name>
+			<email>alessio.dinnocenti@google.com</email>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>damdamdeo</id>
+			<name>Damien Clément d'Huart</name>
+			<email>damien.clementdhuart@gmail.com</email>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+	</developers>
+	<distributionManagement>
+		<repository>
+			<id>bintray</id>
+			<url>https://api.bintray.com/maven/kamaladafrica/maven/axon-cdi/;publish=1</url>
+		</repository>
+	</distributionManagement>
+
 	<dependencies>
 		<!-- Axon Dependency -->
 		<dependency>
