@@ -63,10 +63,12 @@ import com.damdamdeo.cdi.axonframework.extension.impl.configurer.TokenStoreCdiCo
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.TransactionManagerCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.UnavailableConfiguration;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.YamlConfiguration;
+import com.damdamdeo.cdi.axonframework.extension.impl.discovered.AggregateExecutionContext;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.AggregateRootBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.CommandHandlerBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.EventHandlerBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
+import com.damdamdeo.cdi.axonframework.extension.impl.discovered.NoAggregateExecutionContext;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.SagaBeanInfo;
 import com.damdamdeo.cdi.axonframework.support.AxonUtils;
 import com.damdamdeo.cdi.axonframework.support.BeforeStartingAxon;
@@ -110,7 +112,7 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 				}
 			}
 			if (!hasRegisteredDiscoveredAggregateRootBean) {
-				executionContexts.add(new ExecutionContext(aggregateRootBeanInfo));
+				executionContexts.add(new AggregateExecutionContext(aggregateRootBeanInfo));
 			}
 			processAnnotatedType.veto();
 		}
@@ -201,6 +203,11 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 						String.format("'%s' must be defined as '%s' to avoid clashes between instances",
 							beanScopeNotValidException.bean().toString(),
 							beanScopeNotValidException.expectedBeanScoped().getSimpleName())));
+		}
+		if (executionContexts.isEmpty()) {
+			// no aggregate root has been defined.
+			// we only want to listen for events for the write part !
+			executionContexts.add(new NoAggregateExecutionContext());
 		}
 		// Context assemblers
 		sagaBeanInfos.forEach(sagaBeanInfo -> {

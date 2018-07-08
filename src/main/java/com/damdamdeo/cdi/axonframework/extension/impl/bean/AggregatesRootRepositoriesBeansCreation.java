@@ -21,7 +21,7 @@ import org.axonframework.config.Configuration;
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.AggregateRootBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
-import com.damdamdeo.cdi.axonframework.extension.impl.discovered.AggregateRootBeanInfo.QualifierType;
+import com.damdamdeo.cdi.axonframework.extension.impl.discovered.QualifierType;
 import com.damdamdeo.cdi.axonframework.support.CdiUtils;
 
 public class AggregatesRootRepositoriesBeansCreation extends AbstractBeansCreationHandler {

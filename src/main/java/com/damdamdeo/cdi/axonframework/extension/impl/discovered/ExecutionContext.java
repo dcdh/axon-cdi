@@ -1,16 +1,11 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.discovered;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.enterprise.inject.spi.BeanManager;
 
-import org.apache.commons.lang3.Validate;
-import org.axonframework.commandhandling.model.AggregateRoot;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
@@ -19,160 +14,57 @@ import org.axonframework.messaging.correlation.CorrelationDataProvider;
 import org.axonframework.serialization.Serializer;
 
 import com.codahale.metrics.MetricRegistry;
-import com.damdamdeo.cdi.axonframework.extension.impl.discovered.AggregateRootBeanInfo.QualifierType;
 
-public class ExecutionContext {
+public interface ExecutionContext {
 
-	private final List<AggregateRootBeanInfo> aggregateRootBeanInfos = new ArrayList<>();
+	boolean registerIfSameContext(final AggregateRootBeanInfo aggregateRootBeanInfo);
 
-	private final List<SagaBeanInfo> sagaBeanInfos = new ArrayList<>();
+	boolean registerIfSameContext(SagaBeanInfo sagaBeanInfo);
 
-	private final List<CommandHandlerBeanInfo> commandHandlerBeanInfos = new ArrayList<>();
+	boolean registerIfSameContext(CommandHandlerBeanInfo commandHandlerBeanInfo);
 
-	private final List<EventHandlerBeanInfo> eventHandlerBeanInfos = new ArrayList<>();
+	boolean registerIfSameContext(EventHandlerBeanInfo eventHandlerBeanInfo);
 
-	private final MetricRegistry metricRegistry;
+	List<AggregateRootBeanInfo> aggregateRootBeanInfos();
 
-	public ExecutionContext(final AggregateRootBeanInfo aggregateRootBeanInfo) {
-		Objects.requireNonNull(aggregateRootBeanInfo);
-		this.aggregateRootBeanInfos.add(aggregateRootBeanInfo);
-		this.metricRegistry = new MetricRegistry();
-	}
+	List<SagaBeanInfo> sagaBeanInfos();
 
-	public boolean registerIfSameContext(final AggregateRootBeanInfo aggregateRootBeanInfo) {
-		Objects.requireNonNull(aggregateRootBeanInfo);
-		if (aggregateRootBeanInfos.get(0).isSameContext(aggregateRootBeanInfo)) {
-			aggregateRootBeanInfos.add(aggregateRootBeanInfo);
-			return true;
-		}
-		return false;
-	}
+	List<CommandHandlerBeanInfo> commandHandlerBeanInfos();
 
-	public boolean registerIfSameContext(final SagaBeanInfo sagaBeanInfo) {
-		Objects.requireNonNull(sagaBeanInfo);
-		if (aggregateRootBeanInfos.get(0).isSameContext(sagaBeanInfo)) {
-			sagaBeanInfos.add(sagaBeanInfo);
-			return true;
-		}
-		return false;
-	}
+	List<EventHandlerBeanInfo> eventHandlerBeanInfos();
 
-	public boolean registerIfSameContext(final CommandHandlerBeanInfo commandHandlerBeanInfo) {
-		Objects.requireNonNull(commandHandlerBeanInfo);
-		Validate.validState(!commandHandlerBeanInfo.annotatedType().isAnnotationPresent(AggregateRoot.class), "Un aggregat n'est pas un bean command handler !!!");
-		if (aggregateRootBeanInfos.get(0).isSameContext(commandHandlerBeanInfo)) {
-			commandHandlerBeanInfos.add(commandHandlerBeanInfo);
-			return true;
-		}
-		return false;
-	}
+	Set<Annotation> commandGatewayQualifiers();
 
-	public boolean registerIfSameContext(final EventHandlerBeanInfo eventHandlerBeanInfo) {
-		Objects.requireNonNull(eventHandlerBeanInfo);
-		if (aggregateRootBeanInfos.get(0).isSameContext(eventHandlerBeanInfo)) {
-			eventHandlerBeanInfos.add(eventHandlerBeanInfo);
-			return true;
-		}
-		return false;
-	}
+	Set<Annotation> eventSchedulerQualifiers();
 
-	public List<AggregateRootBeanInfo> aggregateRootBeanInfos() {
-		return Collections.unmodifiableList(aggregateRootBeanInfos);
-	}
+	boolean hasAnEventSchedulerBean(BeanManager beanManager);
 
-	public List<SagaBeanInfo> sagaBeanInfos() {
-		return Collections.unmodifiableList(sagaBeanInfos);
-	}
+	boolean hasACommandGatewayBean(BeanManager beanManager);
 
-	public List<CommandHandlerBeanInfo> commandHandlerBeanInfos() {
-		return Collections.unmodifiableList(commandHandlerBeanInfos);
-	}
+	boolean hasAnEventStoreBean(BeanManager beanManager);
 
-	public List<EventHandlerBeanInfo> eventHandlerBeanInfos() {
-		return Collections.unmodifiableList(eventHandlerBeanInfos);
-	}
+	boolean hasAnEventStorageEngineBean(BeanManager beanManager);
 
-	public Set<Annotation> commandGatewayQualifiers() {
-		return aggregateRootBeanInfos.get(0).qualifiers(QualifierType.COMMAND_GATEWAY);
-	}
+	boolean hasATransactionManagerBean(BeanManager beanManager);
 
-	public Set<Annotation> eventSchedulerQualifiers() {
-		return aggregateRootBeanInfos.get(0).qualifiers(QualifierType.EVENT_SCHEDULER);
-	}
+	boolean hasATokenStoreBean(BeanManager beanManager);
 
-	public boolean hasAnEventSchedulerBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.EVENT_SCHEDULER);
-	}
+	boolean hasASerializerBean(BeanManager beanManager);
 
-	public boolean hasACommandGatewayBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.COMMAND_GATEWAY);
-	}
+	boolean hasACorrelationDataProviderBean(BeanManager beanManager);
 
-	public boolean hasAnEventStoreBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.EVENT_BUS);
-	}
+	EventStore getEventStoreReference(BeanManager beanManager);
 
-	public boolean hasAnEventStorageEngineBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.EVENT_STORAGE_ENGINE);
-	}
+	EventStorageEngine getEventStorageEngineReference(BeanManager beanManager);
 
-	public boolean hasATransactionManagerBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.TRANSACTION_MANAGER);
-	}
+	TransactionManager getTransactionManagerReference(BeanManager beanManager);
 
-	public boolean hasATokenStoreBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.TOKEN_STORE);
-	}
+	TokenStore getTokenStoreReference(BeanManager beanManager);
 
-	public boolean hasASerializerBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.SERIALIZER);
-	}
+	Serializer getSerializerReference(BeanManager beanManager);
 
-	public boolean hasACorrelationDataProviderBean(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return aggregateRootBeanInfos.get(0).hasBean(beanManager, QualifierType.CORRELATION_DATA_PROVIDER);
-	}
+	CorrelationDataProvider getCorrelationDataProviderReference(BeanManager beanManager);
 
-	// EventStore extends EventBus
-	public EventStore getEventStoreReference(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return (EventStore) aggregateRootBeanInfos.get(0).getReference(beanManager, QualifierType.EVENT_BUS);
-	}
-
-	public EventStorageEngine getEventStorageEngineReference(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return (EventStorageEngine) aggregateRootBeanInfos.get(0).getReference(beanManager, QualifierType.EVENT_STORAGE_ENGINE);
-	}
-
-	public TransactionManager getTransactionManagerReference(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return (TransactionManager) aggregateRootBeanInfos.get(0).getReference(beanManager, QualifierType.TRANSACTION_MANAGER);
-	}
-
-	public TokenStore getTokenStoreReference(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return (TokenStore) aggregateRootBeanInfos.get(0).getReference(beanManager, QualifierType.TOKEN_STORE);
-	}
-
-	public Serializer getSerializerReference(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return (Serializer) aggregateRootBeanInfos.get(0).getReference(beanManager, QualifierType.SERIALIZER);
-	}
-
-	public CorrelationDataProvider getCorrelationDataProviderReference(final BeanManager beanManager) {
-		Objects.requireNonNull(beanManager);
-		return (CorrelationDataProvider) aggregateRootBeanInfos.get(0).getReference(beanManager, QualifierType.CORRELATION_DATA_PROVIDER);
-	}
-
-	public MetricRegistry metricRegistry() {
-		return metricRegistry;
-	}
+	MetricRegistry metricRegistry();
 
 }
