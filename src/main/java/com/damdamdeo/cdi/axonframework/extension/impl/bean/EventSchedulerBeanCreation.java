@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executors;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -36,6 +37,7 @@ public class EventSchedulerBeanCreation extends AbstractBeansCreationHandler {
 				.beanClass(EventScheduler.class)
 				.qualifiers(executionContext.eventSchedulerQualifiers())
 				.types(EventScheduler.class)
+				.scope(ApplicationScoped.class)
 				.beanLifecycle(
 					new SimpleEventSchedulerContextualLifecycle(configuration));
 			Bean<?> newEventSchedulerBeanToAdd = builder.create();
