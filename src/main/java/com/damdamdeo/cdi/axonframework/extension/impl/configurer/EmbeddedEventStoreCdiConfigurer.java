@@ -1,6 +1,7 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
@@ -59,7 +60,11 @@ public class EmbeddedEventStoreCdiConfigurer extends AbstractCdiConfiguration {
 			if (eventStorageEngine == null) {
 				eventStorageEngine = executionContext.getEventStorageEngineReference(beanManager);
 			}
-			return method.invoke(eventStorageEngine, args);
+			try {
+				return method.invoke(eventStorageEngine, args);
+			} catch (final InvocationTargetException e) {
+				throw e.getCause();
+			}
 		}
 
 	}

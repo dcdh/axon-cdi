@@ -1,6 +1,7 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -62,9 +63,13 @@ public class CommandHandlersCdiConfigurer extends AbstractCdiConfiguration {
 			if (commandHandler == null) {
 				commandHandler = commandHandlerBeanInfo.getReference(beanManager);
 			}
-			return method.invoke(commandHandler, args);
+			try {
+				return method.invoke(commandHandler, args);
+			} catch (final InvocationTargetException e) {
+				throw e.getCause();
+			}
 		}
-		
+
 	}
 
 }

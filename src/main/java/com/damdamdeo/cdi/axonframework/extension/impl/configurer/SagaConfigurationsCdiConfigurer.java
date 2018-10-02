@@ -1,6 +1,7 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
@@ -69,7 +70,11 @@ public class SagaConfigurationsCdiConfigurer extends AbstractCdiConfiguration {
 			if (sagaStore == null) {
 				sagaStore = (SagaStore<?>) sagaBeanInfo.getReference(beanManager, QualifierType.SAGA_STORE);
 			}
-			return method.invoke(sagaStore, args);
+			try {
+				return method.invoke(sagaStore, args);
+			} catch (final InvocationTargetException e) {
+				throw e.getCause();
+			}
 		}
 
 	}

@@ -1,6 +1,7 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -71,7 +72,11 @@ public class EventHandlersCdiConfigurer extends AbstractCdiConfiguration {
 			if (eventHandler == null) {
 				eventHandler = eventHandlerBeanInfo.getReference(beanManager);
 			}
-			return method.invoke(eventHandler, args);
+			try {
+				return method.invoke(eventHandler, args);
+			} catch (final InvocationTargetException e) {
+				throw e.getCause();
+			}
 		}
 		
 	}

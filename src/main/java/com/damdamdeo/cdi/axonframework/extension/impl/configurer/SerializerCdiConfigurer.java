@@ -1,6 +1,7 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
@@ -56,7 +57,11 @@ public class SerializerCdiConfigurer extends AbstractCdiConfiguration {
 			if (serializer == null) {
 				serializer = executionContext.getSerializerReference(beanManager);
 			}
-			return method.invoke(serializer, args);
+			try {
+				return method.invoke(serializer, args);
+			} catch (final InvocationTargetException e) {
+				throw e.getCause();
+			}
 		}
 
 	}

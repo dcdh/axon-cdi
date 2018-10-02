@@ -1,6 +1,7 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
@@ -57,7 +58,11 @@ public class CorrelationDataProviderCdiConfigurer extends AbstractCdiConfigurati
 			if (correlationDataProvider == null) {
 				correlationDataProvider = executionContext.getCorrelationDataProviderReference(beanManager);
 			}
-			return method.invoke(correlationDataProvider, args);
+			try {
+				return method.invoke(correlationDataProvider, args);
+			} catch (final InvocationTargetException e) {
+				throw e.getCause();
+			}
 		}
 
 	}

@@ -1,6 +1,7 @@
 package com.damdamdeo.cdi.axonframework.extension.impl.configurer;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -65,7 +66,11 @@ public class TokenStoreCdiConfigurer extends AbstractCdiConfiguration {
 			if (tokenStore == null) {
 				tokenStore = executionContext.getTokenStoreReference(beanManager);
 			}
-			return method.invoke(tokenStore, args);
+			try {
+				return method.invoke(tokenStore, args);
+			} catch (final InvocationTargetException e) {
+				throw e.getCause();
+			}
 		}
 
 	}
