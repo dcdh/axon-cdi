@@ -140,7 +140,7 @@ public class SagaBeanInfo extends AbstractAnnotatedTypeInfo {
 			final BeanManager beanManager, final SagaConfiguration sagaConfiguration, final Class<?> aggregateType) {
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(sagaConfiguration);
-		Objects.requireNonNull(aggregateType);		
+		Objects.requireNonNull(aggregateType);
 		Map<QualifierType, Set<Annotation>> qualifiers = new HashMap<>();
 		Class<?> fallback = CdiUtils.isInheritMarker(sagaConfiguration.value()) ? aggregateType : sagaConfiguration.value();
 		addQualifiers(beanManager, qualifiers, QualifierType.DEFAULT, sagaConfiguration.value(), fallback);

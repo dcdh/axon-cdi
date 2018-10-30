@@ -68,6 +68,8 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.AggregateRootBe
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.CommandHandlerBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.EventHandlerBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
+import com.damdamdeo.cdi.axonframework.extension.impl.discovered.MessageDispatchInterceptorBeanInfo;
+import com.damdamdeo.cdi.axonframework.extension.impl.discovered.MessageHandlerInterceptorBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.NoAggregateExecutionContext;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.SagaBeanInfo;
 import com.damdamdeo.cdi.axonframework.support.AxonUtils;
@@ -93,6 +95,10 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 
 	private final List<CommandHandlerBeanInfo> commandHandlerBeanInfos = new ArrayList<>();
 
+	private final List<MessageDispatchInterceptorBeanInfo> messageDispatchInterceptorBeanInfos = new ArrayList<>();
+
+	private final List<MessageHandlerInterceptorBeanInfo> messageHandlerInterceptorBeanInfos = new ArrayList<>();
+
 	private final List<EventHandlerBeanInfo> eventHandlerBeanInfos = new ArrayList<>();
 
 	private final List<Configuration> configurations = new ArrayList<>();
@@ -115,6 +121,22 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 				executionContexts.add(new AggregateExecutionContext(aggregateRootBeanInfo));
 			}
 			processAnnotatedType.veto();
+		}
+	}
+
+	<X> void processMessageDispatchInterceptorBeanAnnotatedType(
+			@Observes final ProcessAnnotatedType<X> processAnnotatedType, final BeanManager beanManager) {
+		AnnotatedType<X> annotatedType = processAnnotatedType.getAnnotatedType();
+		if (AxonUtils.isMessageDispatchInterceptor(annotatedType.getJavaClass())) {
+			messageDispatchInterceptorBeanInfos.add(MessageDispatchInterceptorBeanInfo.of(beanManager, annotatedType));
+		}
+	}
+	
+	<X> void processMessageHandlerInterceptorBeanAnnotatedType(
+			@Observes final ProcessAnnotatedType<X> processAnnotatedType, final BeanManager beanManager) {
+		AnnotatedType<X> annotatedType = processAnnotatedType.getAnnotatedType();
+		if (AxonUtils.isMessageHandlerInterceptor(annotatedType.getJavaClass())) {
+			messageHandlerInterceptorBeanInfos.add(MessageHandlerInterceptorBeanInfo.of(beanManager, annotatedType));
 		}
 	}
 
@@ -189,8 +211,14 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 		for (SagaBeanInfo sagaBeanInfo : sagaBeanInfos) {
 			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, sagaBeanInfo.type());
 		}
+		for (MessageDispatchInterceptorBeanInfo messageDispatchInterceptorBeanInfo : messageDispatchInterceptorBeanInfos) {
+			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, messageDispatchInterceptorBeanInfo.type());
+		}
+		for (MessageHandlerInterceptorBeanInfo messageHandlerInterceptorBeanInfo : messageHandlerInterceptorBeanInfos) {
+			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, messageHandlerInterceptorBeanInfo.type());
+		}
 		for (CommandHandlerBeanInfo commandHandlerBeanInfo : commandHandlerBeanInfos) {
-			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, commandHandlerBeanInfo.type());			
+			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, commandHandlerBeanInfo.type());
 		}
 		for (EventHandlerBeanInfo eventHandlerBeanInfo : eventHandlerBeanInfos) {
 			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, eventHandlerBeanInfo.type());
@@ -210,6 +238,12 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 			executionContexts.add(new NoAggregateExecutionContext());
 		}
 		// Context assemblers
+		messageDispatchInterceptorBeanInfos.forEach(messageDispatchInterceptorBeanInfo -> {
+			executionContexts.stream().forEach(executionContext -> executionContext.registerIfSameContext(messageDispatchInterceptorBeanInfo));
+		});
+		messageHandlerInterceptorBeanInfos.forEach(messageHandlerInterceptorBeanInfo -> {
+			executionContexts.stream().forEach(executionContext -> executionContext.registerIfSameContext(messageHandlerInterceptorBeanInfo));
+		});
 		sagaBeanInfos.forEach(sagaBeanInfo -> {
 			executionContexts.stream().forEach(executionContext -> executionContext.registerIfSameContext(sagaBeanInfo));
 		});

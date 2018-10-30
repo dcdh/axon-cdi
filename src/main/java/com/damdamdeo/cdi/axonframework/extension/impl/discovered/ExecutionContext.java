@@ -21,6 +21,10 @@ public interface ExecutionContext {
 
 	boolean registerIfSameContext(SagaBeanInfo sagaBeanInfo);
 
+	boolean registerIfSameContext(MessageDispatchInterceptorBeanInfo messageDispatchInterceptorBeanInfo);
+
+	boolean registerIfSameContext(MessageHandlerInterceptorBeanInfo messageHandlerInterceptorBeanInfo);
+
 	boolean registerIfSameContext(CommandHandlerBeanInfo commandHandlerBeanInfo);
 
 	boolean registerIfSameContext(EventHandlerBeanInfo eventHandlerBeanInfo);
@@ -32,6 +36,10 @@ public interface ExecutionContext {
 	List<CommandHandlerBeanInfo> commandHandlerBeanInfos();
 
 	List<EventHandlerBeanInfo> eventHandlerBeanInfos();
+
+	List<MessageDispatchInterceptorBeanInfo> messageDispatchInterceptorBeanInfos();
+
+	List<MessageHandlerInterceptorBeanInfo> messageHandlerInterceptorBeanInfos();
 
 	Set<Annotation> commandGatewayQualifiers();
 

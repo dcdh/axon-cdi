@@ -31,7 +31,17 @@ public class NoAggregateExecutionContext implements ExecutionContext {
 	}
 
 	@Override
-	public boolean registerIfSameContext(AggregateRootBeanInfo aggregateRootBeanInfo) {
+	public boolean registerIfSameContext(final AggregateRootBeanInfo aggregateRootBeanInfo) {
+		throw new UnsupportedOperationException("No Aggregate defined !");
+	}
+
+	@Override
+	public boolean registerIfSameContext(final MessageDispatchInterceptorBeanInfo messageHandlerInterceptorBeanInfo) {
+		throw new UnsupportedOperationException("No Aggregate defined !");
+	}
+
+	@Override
+	public boolean registerIfSameContext(final MessageHandlerInterceptorBeanInfo messageHandlerInterceptorBeanInfo) {
 		throw new UnsupportedOperationException("No Aggregate defined !");
 	}
 
@@ -53,6 +63,16 @@ public class NoAggregateExecutionContext implements ExecutionContext {
 
 	@Override
 	public List<AggregateRootBeanInfo> aggregateRootBeanInfos() {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public List<MessageDispatchInterceptorBeanInfo> messageDispatchInterceptorBeanInfos() {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public List<MessageHandlerInterceptorBeanInfo> messageHandlerInterceptorBeanInfos() {
 		return Collections.emptyList();
 	}
 

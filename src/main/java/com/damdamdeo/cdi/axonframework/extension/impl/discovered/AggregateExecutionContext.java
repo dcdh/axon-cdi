@@ -26,6 +26,10 @@ public class AggregateExecutionContext implements ExecutionContext {
 
 	private final List<SagaBeanInfo> sagaBeanInfos = new ArrayList<>();
 
+	private final List<MessageDispatchInterceptorBeanInfo> messageDispatchInterceptorBeanInfos = new ArrayList<>();
+
+	private final List<MessageHandlerInterceptorBeanInfo> messageHandlerInterceptorBeanInfos = new ArrayList<>();
+
 	private final List<CommandHandlerBeanInfo> commandHandlerBeanInfos = new ArrayList<>();
 
 	private final List<EventHandlerBeanInfo> eventHandlerBeanInfos = new ArrayList<>();
@@ -52,6 +56,26 @@ public class AggregateExecutionContext implements ExecutionContext {
 		Objects.requireNonNull(sagaBeanInfo);
 		if (aggregateRootBeanInfos.get(0).isSameContext(sagaBeanInfo)) {
 			sagaBeanInfos.add(sagaBeanInfo);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean registerIfSameContext(final MessageDispatchInterceptorBeanInfo messageDispatchInterceptorBeanInfo) {
+		Objects.requireNonNull(messageDispatchInterceptorBeanInfo);
+		if (aggregateRootBeanInfos.get(0).isSameContext(messageDispatchInterceptorBeanInfo)) {
+			messageDispatchInterceptorBeanInfos.add(messageDispatchInterceptorBeanInfo);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean registerIfSameContext(final MessageHandlerInterceptorBeanInfo messageHandlerInterceptorBeanInfo) {
+		Objects.requireNonNull(messageHandlerInterceptorBeanInfo);
+		if (aggregateRootBeanInfos.get(0).isSameContext(messageHandlerInterceptorBeanInfo)) {
+			messageHandlerInterceptorBeanInfos.add(messageHandlerInterceptorBeanInfo);
 			return true;
 		}
 		return false;
@@ -86,6 +110,16 @@ public class AggregateExecutionContext implements ExecutionContext {
 	@Override
 	public List<SagaBeanInfo> sagaBeanInfos() {
 		return Collections.unmodifiableList(sagaBeanInfos);
+	}
+
+	@Override
+	public List<MessageDispatchInterceptorBeanInfo> messageDispatchInterceptorBeanInfos() {
+		return Collections.unmodifiableList(messageDispatchInterceptorBeanInfos);
+	}
+
+	@Override
+	public List<MessageHandlerInterceptorBeanInfo> messageHandlerInterceptorBeanInfos() {
+		return Collections.unmodifiableList(messageHandlerInterceptorBeanInfos);
 	}
 
 	@Override

@@ -34,7 +34,7 @@ public class CommandHandlersCdiConfigurer extends AbstractCdiConfiguration {
 			// Use a proxy to get reference (because it is not created yet)
 			// I can't use Proxy from jdk because a CommandHandler doesn't implement an interface.
 			// Go for byte-buddy :)
-			Class<?> proxyCommandHandler = new ByteBuddy()
+			final Class<?> proxyCommandHandler = new ByteBuddy()
 				.subclass(commandHandlerBeanInfo.type())
 				.method(ElementMatchers.any())
 				.intercept(InvocationHandlerAdapter.of(new CommandHandlerInvocationHandler(beanManager, commandHandlerBeanInfo)))

@@ -62,6 +62,18 @@ public class AggregateRootBeanInfo {
 				&& qualifiers.get(QualifierType.EVENT_BUS).equals(aggregateRootBeanInfo.qualifiers(QualifierType.EVENT_BUS));
 	}
 
+	public boolean isSameContext(final MessageDispatchInterceptorBeanInfo messageDispatchInterceptorBeanInfo) {
+		Objects.requireNonNull(messageDispatchInterceptorBeanInfo);
+		return true; // FIXME
+//		return qualifiers.get(QualifierType.COMMAND_GATEWAY).equals(messageDispatchInterceptorBeanInfo.normalizedQualifiers());
+	}
+
+	public boolean isSameContext(final MessageHandlerInterceptorBeanInfo messageHandlerInterceptorBeanInfo) {
+		Objects.requireNonNull(messageHandlerInterceptorBeanInfo);
+		return true; // FIXME
+//		return qualifiers.get(QualifierType.COMMAND_GATEWAY).equals(messageHandlerInterceptorBeanInfo.normalizedQualifiers());
+	}
+
 	public boolean isSameContext(final SagaBeanInfo sagaBeanInfo) {
 		Objects.requireNonNull(sagaBeanInfo);
 		return qualifiers.get(QualifierType.EVENT_BUS).equals(sagaBeanInfo.qualifiers(SagaBeanInfo.QualifierType.EVENT_BUS));

@@ -16,6 +16,8 @@ import org.axonframework.commandhandling.model.AggregateRoot;
 import org.axonframework.eventhandling.EventBus;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventListener;
+import org.axonframework.messaging.MessageDispatchInterceptor;
+import org.axonframework.messaging.MessageHandlerInterceptor;
 import org.axonframework.messaging.correlation.CorrelationDataProvider;
 
 public class AxonUtils {
@@ -60,6 +62,14 @@ public class AxonUtils {
 
 	public static boolean isCommandGateway(final Class<?> targetClass) {
 		return CommandGateway.class.isAssignableFrom(targetClass);
+	}
+
+	public static boolean isMessageDispatchInterceptor(final Class<?> targetClass) {
+		return MessageDispatchInterceptor.class.isAssignableFrom(targetClass);
+	}
+
+	public static boolean isMessageHandlerInterceptor(final Class<?> targetClass) {
+		return MessageHandlerInterceptor.class.isAssignableFrom(targetClass);
 	}
 
 	public static boolean hasCommandHandlerMethod(final Class<?> beanClass) {
