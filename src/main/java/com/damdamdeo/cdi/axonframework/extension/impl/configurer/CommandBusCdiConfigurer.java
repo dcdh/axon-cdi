@@ -17,7 +17,10 @@ import org.axonframework.config.Configurer;
 import org.axonframework.messaging.Message;
 import org.axonframework.messaging.MessageDispatchInterceptor;
 import org.axonframework.messaging.MessageHandlerInterceptor;
+import org.axonframework.messaging.correlation.CorrelationDataProvider;
+import org.axonframework.messaging.interceptors.CorrelationDataInterceptor;
 
+import com.damdamdeo.cdi.axonframework.extension.impl.configurer.CorrelationDataProviderCdiConfigurer.CorrelationDataProviderInvocationHandler;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.MessageDispatchInterceptorBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.MessageHandlerInterceptorBeanInfo;
@@ -81,6 +84,13 @@ public class CommandBusCdiConfigurer implements AxonCdiConfigurer {
 								new MessageHandlerInterceptorHandler(beanManager, messageHandlerInterceptorBeanInfo)));
 					}
 				});
+			if (executionContext.hasACorrelationDataProviderBean(beanManager)) {
+				CorrelationDataProvider correlationDataProvider = (CorrelationDataProvider) Proxy.newProxyInstance(
+						CorrelationDataProvider.class.getClassLoader(),
+						new Class[] { CorrelationDataProvider.class },
+						new CorrelationDataProviderInvocationHandler(beanManager, executionContext));
+				simpleCommandBus.registerHandlerInterceptor(new CorrelationDataInterceptor<>(correlationDataProvider));
+			}
 			commandBus = simpleCommandBus;
 			break;
 		case DISRUPTOR:

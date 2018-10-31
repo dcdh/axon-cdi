@@ -224,6 +224,7 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 		for (ExecutionContext executionContext : executionContexts) {
 			final Configurer configurer = DefaultConfigurer.defaultConfiguration();
 			Arrays.asList(new ParameterResolverCdiConfigurer(),
+					new CorrelationDataProviderCdiConfigurer(),
 					new EmbeddedEventStoreCdiConfigurer(),
 					new CommandBusCdiConfigurer(),
 					new SerializerCdiConfigurer(),
@@ -231,7 +232,6 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 					new PlatformTransactionManagerCdiConfigurer(),
 					new TransactionManagerCdiConfigurer(),
 					new ResourceInjectorCdiConfigurer(),
-					new CorrelationDataProviderCdiConfigurer(),
 					new EventHandlersCdiConfigurer(),
 					new SagaConfigurationsCdiConfigurer(),
 					new CommandHandlersCdiConfigurer(),

@@ -32,13 +32,14 @@ public class CorrelationDataProviderCdiConfigurer implements AxonCdiConfigurer {
 				new Class[] { CorrelationDataProvider.class },
 				new CorrelationDataProviderInvocationHandler(beanManager, executionContext));
 			// only one can be registered per configurer
+			// TODO : allow multiple CorrelationDataProvider beans
 			configurer.configureCorrelationDataProviders(c -> Collections.singletonList(correlationDataProvider));
 		} else {
 			LOGGER.log(Level.INFO, "CorrelationDataProvider - none defined, using default one");
 		}
 	}
 
-	private class CorrelationDataProviderInvocationHandler implements InvocationHandler {
+	public static class CorrelationDataProviderInvocationHandler implements InvocationHandler {
 
 		private final BeanManager beanManager;
 		private final ExecutionContext executionContext;
