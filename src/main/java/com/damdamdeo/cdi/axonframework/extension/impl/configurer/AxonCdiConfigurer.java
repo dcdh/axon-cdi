@@ -8,6 +8,6 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
 
 public interface AxonCdiConfigurer {
 
-	Configurer setUp(Configurer configurer, BeanManager beanManager, ExecutionContext executionContext, FileConfiguration fileConfiguration) throws Exception;
+	void setUp(Configurer configurer, BeanManager beanManager, ExecutionContext executionContext, FileConfiguration fileConfiguration) throws RuntimeException;
 
 }

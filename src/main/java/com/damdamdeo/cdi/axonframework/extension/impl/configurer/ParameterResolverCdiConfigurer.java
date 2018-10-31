@@ -8,14 +8,10 @@ import org.axonframework.config.Configurer;
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
-public class ParameterResolverCdiConfigurer extends AbstractCdiConfiguration {
-
-	public ParameterResolverCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
+public class ParameterResolverCdiConfigurer implements AxonCdiConfigurer {
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);

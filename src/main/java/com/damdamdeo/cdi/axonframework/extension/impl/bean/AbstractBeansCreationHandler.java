@@ -13,12 +13,6 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
 
 public abstract class AbstractBeansCreationHandler implements BeansCreationHandler {
 
-	private final BeansCreationHandler original;
-
-	public AbstractBeansCreationHandler(final BeansCreationHandler original) {
-		this.original = Objects.requireNonNull(original);
-	}
-
 	@Override
 	public void create(final AfterBeanDiscovery afterBeanDiscovery,
 				final BeanManager beanManager, final ExecutionContext executionContext,
@@ -26,7 +20,6 @@ public abstract class AbstractBeansCreationHandler implements BeansCreationHandl
 		Objects.requireNonNull(afterBeanDiscovery);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
-		original.create(afterBeanDiscovery, beanManager, executionContext, configuration);
 		Set<Bean<?>> newBeansToAdd = concreateCreateBean(beanManager, executionContext, configuration);
 		newBeansToAdd.stream().forEach(newBeanToAdd -> afterBeanDiscovery.addBean(newBeanToAdd));
 	}

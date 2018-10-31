@@ -18,10 +18,6 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
 
 public class MetricRegistryBeanCreation extends AbstractBeansCreationHandler {
 
-	public MetricRegistryBeanCreation(final BeansCreationHandler original) {
-		super(original);
-	}
-
 	@Override
 	protected Set<Bean<?>> concreateCreateBean(final BeanManager beanManager, final ExecutionContext executionContext,
 			final Configuration configuration) {

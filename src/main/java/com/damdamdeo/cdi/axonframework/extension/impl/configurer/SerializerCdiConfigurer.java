@@ -15,16 +15,12 @@ import org.axonframework.serialization.Serializer;
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
-public class SerializerCdiConfigurer extends AbstractCdiConfiguration {
+public class SerializerCdiConfigurer implements AxonCdiConfigurer {
 
 	private static final Logger LOGGER = Logger.getLogger(SerializerCdiConfigurer.class.getName());
 
-	public SerializerCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
-
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);

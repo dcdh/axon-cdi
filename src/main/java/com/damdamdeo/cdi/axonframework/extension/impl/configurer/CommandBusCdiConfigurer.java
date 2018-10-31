@@ -36,17 +36,13 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.MessageHandlerI
  * @author damien
  *
  */
-public class CommandBusCdiConfigurer extends AbstractCdiConfiguration {
+public class CommandBusCdiConfigurer implements AxonCdiConfigurer {
 
 	private static final Logger LOGGER = Logger.getLogger(CommandBusCdiConfigurer.class.getName());
 
-	public CommandBusCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
-
 	@SuppressWarnings({ "unchecked" })
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);

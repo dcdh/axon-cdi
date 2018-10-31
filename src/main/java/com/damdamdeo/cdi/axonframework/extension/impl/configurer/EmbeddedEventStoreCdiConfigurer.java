@@ -16,31 +16,31 @@ import org.axonframework.eventsourcing.eventstore.inmemory.InMemoryEventStorageE
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
-public class EmbeddedEventStoreCdiConfigurer extends AbstractCdiConfiguration {
+public class EmbeddedEventStoreCdiConfigurer implements AxonCdiConfigurer {
 
 	private static final Logger LOGGER = Logger.getLogger(EmbeddedEventStoreCdiConfigurer.class.getName());
 
-	public EmbeddedEventStoreCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
-
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
 		Objects.requireNonNull(fileConfiguration);
-		if (executionContext.hasAnEventStorageEngineBean(beanManager)) {
-			EventStorageEngine eventStorageEngine = (EventStorageEngine) Proxy.newProxyInstance(
-				EventStorageEngine.class.getClassLoader(),
-				new Class[] { EventStorageEngine.class },
-				new EventStorageEngineInvocationHandler(beanManager, executionContext));
-			// only one can be registered by configurer
-			configurer.configureEmbeddedEventStore(c -> eventStorageEngine);
-		} else {
-			// default InMemoryEventStorageEngine...
-			LOGGER.log(Level.WARNING, "EventStore - none defined, using EmbeddedEventStore with InMemoryEventStorageEngine");
-			configurer.configureEmbeddedEventStore(c -> new InMemoryEventStorageEngine());
+		try {
+			if (executionContext.hasAnEventStorageEngineBean(beanManager)) {
+				EventStorageEngine eventStorageEngine = (EventStorageEngine) Proxy.newProxyInstance(
+						EventStorageEngine.class.getClassLoader(),
+						new Class[] { EventStorageEngine.class },
+						new EventStorageEngineInvocationHandler(beanManager, executionContext));
+				// only one can be registered by configurer
+				configurer.configureEmbeddedEventStore(c -> eventStorageEngine);
+			} else {
+				// default InMemoryEventStorageEngine...
+				LOGGER.log(Level.WARNING, "EventStore - none defined, using EmbeddedEventStore with InMemoryEventStorageEngine");
+				configurer.configureEmbeddedEventStore(c -> new InMemoryEventStorageEngine());
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 

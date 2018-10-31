@@ -22,10 +22,6 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
 // not used in the DefaultConfigurer
 public class EventSchedulerBeanCreation extends AbstractBeansCreationHandler {
 
-	public EventSchedulerBeanCreation(final BeansCreationHandler original) {
-		super(original);
-	}
-
 	@Override
 	protected Set<Bean<?>> concreateCreateBean(final BeanManager beanManager, final ExecutionContext executionContext,
 				final Configuration configuration) {

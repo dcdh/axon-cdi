@@ -19,41 +19,41 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 // cf. AxonAutoConfiguration : configureEventHandling
 // also DefaultConfigurerTest : testRegisterSeveralModules
-public class EventHandlersCdiConfigurer extends AbstractCdiConfiguration {
-
-	public EventHandlersCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
+public class EventHandlersCdiConfigurer implements AxonCdiConfigurer {
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
 		Objects.requireNonNull(fileConfiguration);
 
 		EventHandlingConfiguration eventHandlingConfiguration = new EventHandlingConfiguration();
-		for (final EventHandlerBeanInfo eventHandlerBeanInfo : executionContext.eventHandlerBeanInfos()) {
-			// use byte-buddy
-			// cf. CommandHandlersCdiConfigurer for more information
-			Class<?> proxyEventHandler = new ByteBuddy()
-				.subclass(eventHandlerBeanInfo.type())
-				.method(ElementMatchers.any())
-				.intercept(InvocationHandlerAdapter.of(new EventHandlerInvocationHandler(beanManager, eventHandlerBeanInfo)))
-				.make()
-				.load(eventHandlerBeanInfo.type().getClassLoader())
-				.getLoaded();
-			Object instanceEventHandler = proxyEventHandler.newInstance();
-			eventHandlingConfiguration.registerEventHandler(c -> instanceEventHandler);
-			// By default we consider that we are tracking event handlers
-			eventHandlingConfiguration.usingTrackingProcessors();
-			// By default a tracking event processor is linked with the full qualified Aggregate
-			// However when replaying event it can failed because order in the store is not respected.
-			// By assigning the same event processor name on all aggregate order will be respected :)
-//			eventHandlingConfiguration.byDefaultAssignTo("SAME_AGGREGATE_GROUP");
-// passage par @ProcessingGroup
+		try {
+			for (final EventHandlerBeanInfo eventHandlerBeanInfo : executionContext.eventHandlerBeanInfos()) {
+				// use byte-buddy
+				// cf. CommandHandlersCdiConfigurer for more information
+				Class<?> proxyEventHandler = new ByteBuddy()
+						.subclass(eventHandlerBeanInfo.type())
+						.method(ElementMatchers.any())
+						.intercept(InvocationHandlerAdapter.of(new EventHandlerInvocationHandler(beanManager, eventHandlerBeanInfo)))
+						.make()
+						.load(eventHandlerBeanInfo.type().getClassLoader())
+						.getLoaded();
+				Object instanceEventHandler = proxyEventHandler.newInstance();
+				eventHandlingConfiguration.registerEventHandler(c -> instanceEventHandler);
+				// By default we consider that we are tracking event handlers
+				eventHandlingConfiguration.usingTrackingProcessors();
+				// By default a tracking event processor is linked with the full qualified Aggregate
+				// However when replaying event it can failed because order in the store is not respected.
+				// By assigning the same event processor name on all aggregate order will be respected :)
+				//			eventHandlingConfiguration.byDefaultAssignTo("SAME_AGGREGATE_GROUP");
+				// passage par @ProcessingGroup
+			}
+			configurer.registerModule(eventHandlingConfiguration);
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
-		configurer.registerModule(eventHandlingConfiguration);
 	}
 
 	private class EventHandlerInvocationHandler implements InvocationHandler {
@@ -78,7 +78,7 @@ public class EventHandlersCdiConfigurer extends AbstractCdiConfiguration {
 				throw e.getCause();
 			}
 		}
-		
+
 	}
 
 }

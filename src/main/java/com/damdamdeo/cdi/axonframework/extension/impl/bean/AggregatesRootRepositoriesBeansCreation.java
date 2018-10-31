@@ -26,10 +26,6 @@ import com.damdamdeo.cdi.axonframework.support.CdiUtils;
 
 public class AggregatesRootRepositoriesBeansCreation extends AbstractBeansCreationHandler {
 
-	public AggregatesRootRepositoriesBeansCreation(final BeansCreationHandler original) {
-		super(original);
-	}
-
 	@Override
 	protected Set<Bean<?>> concreateCreateBean(final BeanManager beanManager, final ExecutionContext executionContext, final Configuration configuration) {
 		Objects.requireNonNull(beanManager);

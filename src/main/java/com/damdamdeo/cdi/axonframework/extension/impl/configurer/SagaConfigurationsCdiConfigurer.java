@@ -20,17 +20,13 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.SagaBeanInfo;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.SagaBeanInfo.QualifierType;
 
 // cf. https://docs.axonframework.org/part-ii-domain-logic/sagas
-public class SagaConfigurationsCdiConfigurer extends AbstractCdiConfiguration {
+public class SagaConfigurationsCdiConfigurer implements AxonCdiConfigurer {
 
 	private static final Logger LOGGER = Logger.getLogger(SagaConfigurationsCdiConfigurer.class.getName());
 
-	public SagaConfigurationsCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
-
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);

@@ -19,34 +19,34 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.matcher.ElementMatchers;
 
-public class TokenStoreCdiConfigurer extends AbstractCdiConfiguration {
+public class TokenStoreCdiConfigurer implements AxonCdiConfigurer {
 
 	private static final Logger LOGGER = Logger.getLogger(TokenStoreCdiConfigurer.class.getName());
 
-	public TokenStoreCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
-
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
 		Objects.requireNonNull(fileConfiguration);
-		if (executionContext.hasATokenStoreBean(beanManager)) {
-			Class<? extends TokenStore> proxyTokenStore = new ByteBuddy()
-				.subclass(TokenStore.class)
-				.method(ElementMatchers.any())
-				.intercept(InvocationHandlerAdapter.of(new TokenStoreInvocationHandler(beanManager, executionContext)))
-				.make()
-				.load(TokenStore.class.getClassLoader())
-				.getLoaded();
-			TokenStore instanceTokenStore = proxyTokenStore.newInstance();
-			configurer.registerComponent(TokenStore.class, c -> instanceTokenStore);
-		} else {
-			// default in memory
-			LOGGER.log(Level.WARNING, "TokenStore - none defined, using InMemoryTokenStore");
-			configurer.registerComponent(TokenStore.class, c -> new InMemoryTokenStore());
+		try {
+			if (executionContext.hasATokenStoreBean(beanManager)) {
+				Class<? extends TokenStore> proxyTokenStore = new ByteBuddy()
+						.subclass(TokenStore.class)
+						.method(ElementMatchers.any())
+						.intercept(InvocationHandlerAdapter.of(new TokenStoreInvocationHandler(beanManager, executionContext)))
+						.make()
+						.load(TokenStore.class.getClassLoader())
+						.getLoaded();
+				TokenStore instanceTokenStore = proxyTokenStore.newInstance();
+				configurer.registerComponent(TokenStore.class, c -> instanceTokenStore);
+			} else {
+				// default in memory
+				LOGGER.log(Level.WARNING, "TokenStore - none defined, using InMemoryTokenStore");
+				configurer.registerComponent(TokenStore.class, c -> new InMemoryTokenStore());
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 

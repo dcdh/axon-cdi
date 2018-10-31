@@ -16,33 +16,32 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.matcher.ElementMatchers;
 
-public class CommandHandlersCdiConfigurer extends AbstractCdiConfiguration {
-
-	public CommandHandlersCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
+public class CommandHandlersCdiConfigurer implements AxonCdiConfigurer {
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);
 		Objects.requireNonNull(fileConfiguration);
-
-		// can't use lambda because of the checked exceptions thrown by *proxyCommandHandler.newInstance()*
-		for (final CommandHandlerBeanInfo commandHandlerBeanInfo: executionContext.commandHandlerBeanInfos()) {
-			// Use a proxy to get reference (because it is not created yet)
-			// I can't use Proxy from jdk because a CommandHandler doesn't implement an interface.
-			// Go for byte-buddy :)
-			final Class<?> proxyCommandHandler = new ByteBuddy()
-				.subclass(commandHandlerBeanInfo.type())
-				.method(ElementMatchers.any())
-				.intercept(InvocationHandlerAdapter.of(new CommandHandlerInvocationHandler(beanManager, commandHandlerBeanInfo)))
-				.make()
-				.load(commandHandlerBeanInfo.type().getClassLoader())
-				.getLoaded();
-			Object instanceCommandHandler = proxyCommandHandler.newInstance();
-			configurer.registerCommandHandler(c -> instanceCommandHandler);
+		try {
+			// can't use lambda because of the checked exceptions thrown by *proxyCommandHandler.newInstance()*
+			for (final CommandHandlerBeanInfo commandHandlerBeanInfo: executionContext.commandHandlerBeanInfos()) {
+				// Use a proxy to get reference (because it is not created yet)
+				// I can't use Proxy from jdk because a CommandHandler doesn't implement an interface.
+				// Go for byte-buddy :)
+				final Class<?> proxyCommandHandler = new ByteBuddy()
+						.subclass(commandHandlerBeanInfo.type())
+						.method(ElementMatchers.any())
+						.intercept(InvocationHandlerAdapter.of(new CommandHandlerInvocationHandler(beanManager, commandHandlerBeanInfo)))
+						.make()
+						.load(commandHandlerBeanInfo.type().getClassLoader())
+						.getLoaded();
+				Object instanceCommandHandler = proxyCommandHandler.newInstance();
+				configurer.registerCommandHandler(c -> instanceCommandHandler);
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 
 	}

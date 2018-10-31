@@ -6,8 +6,8 @@ import javax.enterprise.context.Dependent;
 
 public class DependentScopedBeanValidator extends AbstractScopedBeanValidator {
 
-	public DependentScopedBeanValidator(final BeanScopeValidator beanScopeValidator, final Class<?> targetClazz) {
-		super(beanScopeValidator, targetClazz);
+	public DependentScopedBeanValidator(final Class<?> targetClazz) {
+		super(targetClazz);
 	}
 
 	@Override

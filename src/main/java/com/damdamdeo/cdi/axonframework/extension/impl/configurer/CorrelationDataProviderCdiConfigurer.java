@@ -16,16 +16,12 @@ import org.axonframework.messaging.correlation.CorrelationDataProvider;
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
-public class CorrelationDataProviderCdiConfigurer extends AbstractCdiConfiguration {
+public class CorrelationDataProviderCdiConfigurer implements AxonCdiConfigurer {
 
 	private static final Logger LOGGER = Logger.getLogger(CorrelationDataProviderCdiConfigurer.class.getName());
 
-	public CorrelationDataProviderCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
-
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);

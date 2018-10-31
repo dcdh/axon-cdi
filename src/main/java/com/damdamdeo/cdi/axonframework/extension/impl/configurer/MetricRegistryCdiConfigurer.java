@@ -9,15 +9,11 @@ import org.axonframework.metrics.GlobalMetricRegistry;
 
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 
-public class MetricRegistryCdiConfigurer extends AbstractCdiConfiguration {
-
-	public MetricRegistryCdiConfigurer(AxonCdiConfigurer original) {
-		super(original);
-	}
+public class MetricRegistryCdiConfigurer implements AxonCdiConfigurer {
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration)
-			throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration)
+			throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);

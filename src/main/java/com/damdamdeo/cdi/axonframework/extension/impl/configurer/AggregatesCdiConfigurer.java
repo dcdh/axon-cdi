@@ -53,17 +53,13 @@ import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContex
  *
  */
 
-public class AggregatesCdiConfigurer extends AbstractCdiConfiguration {
+public class AggregatesCdiConfigurer implements AxonCdiConfigurer {
 
 	private static final Logger LOGGER = Logger.getLogger(AggregatesCdiConfigurer.class.getName());
 
-	public AggregatesCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
-
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);

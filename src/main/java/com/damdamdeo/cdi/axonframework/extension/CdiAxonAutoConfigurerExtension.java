@@ -1,9 +1,11 @@
 package com.damdamdeo.cdi.axonframework.extension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.InjectionException;
@@ -33,8 +35,6 @@ import org.axonframework.serialization.Serializer;
 
 import com.codahale.metrics.MetricRegistry;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.AggregatesRootRepositoriesBeansCreation;
-import com.damdamdeo.cdi.axonframework.extension.impl.bean.BeanCreationEntryPoint;
-import com.damdamdeo.cdi.axonframework.extension.impl.bean.BeansCreationHandler;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.CommandGatewayBeanCreation;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.EventSchedulerBeanCreation;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.EventStoreBeanCreation;
@@ -42,16 +42,13 @@ import com.damdamdeo.cdi.axonframework.extension.impl.bean.MetricRegistryBeanCre
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.validation.ApplicationScopedBeanValidator;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.validation.BeanScopeNotValidException;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.validation.BeanScopeValidator;
-import com.damdamdeo.cdi.axonframework.extension.impl.bean.validation.BeanScopeValidatorEntryPoint;
 import com.damdamdeo.cdi.axonframework.extension.impl.bean.validation.DependentScopedBeanValidator;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.AggregatesCdiConfigurer;
-import com.damdamdeo.cdi.axonframework.extension.impl.configurer.AxonCdiConfigurationEntryPoint;
-import com.damdamdeo.cdi.axonframework.extension.impl.configurer.AxonCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.CommandBusCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.CommandHandlersCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.CorrelationDataProviderCdiConfigurer;
-import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EventHandlersCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EmbeddedEventStoreCdiConfigurer;
+import com.damdamdeo.cdi.axonframework.extension.impl.configurer.EventHandlersCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.FileConfiguration;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.MetricRegistryCdiConfigurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.configurer.ParameterResolverCdiConfigurer;
@@ -172,66 +169,36 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 	<T> void afterBeanDiscovery(@Observes final AfterBeanDiscovery afterBeanDiscovery, final BeanManager beanManager) throws Exception {
 		LOGGER.log(Level.INFO, "Axon CDI Extension - Activated");
 		// load yaml configuration
-		final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-		FileConfiguration fileConfiguration;
-		try {
-			fileConfiguration = mapper.readValue(this.getClass().getResourceAsStream("/configuration.yaml"), YamlConfiguration.class);
-			LOGGER.log(Level.INFO, "Loaded conf:");
-			LOGGER.log(Level.INFO, ReflectionToStringBuilder.toString(fileConfiguration, ToStringStyle.MULTI_LINE_STYLE));
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Unable to load conf - using default configuration: " + e.getMessage());
-			fileConfiguration = new UnavailableConfiguration();
-		}
+		final FileConfiguration fileConfiguration = readFileConfiguration();
 
 		// Scoped validations
-		BeanScopeValidator beanScopeValidator = new ApplicationScopedBeanValidator(
-			new ApplicationScopedBeanValidator(
-				new ApplicationScopedBeanValidator(
-					new ApplicationScopedBeanValidator(
-						new ApplicationScopedBeanValidator(
-							new ApplicationScopedBeanValidator(
-								new ApplicationScopedBeanValidator(
-									new ApplicationScopedBeanValidator(
-										new ApplicationScopedBeanValidator(
-											new ApplicationScopedBeanValidator(
-												new ApplicationScopedBeanValidator(
-													new BeanScopeValidatorEntryPoint(),
-														CommandBus.class),
-															CommandGateway.class),
-																EventBus.class),
-																	SnapshotTriggerDefinition.class),
-																		TokenStore.class),
-																			TransactionManager.class),
-																				Serializer.class),
-																					EventStorageEngine.class),
-																						EventScheduler.class),
-																							CorrelationDataProvider.class),
-																								MetricRegistry.class); 
-		;
-		for (SagaBeanInfo sagaBeanInfo : sagaBeanInfos) {
-			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, sagaBeanInfo.type());
-		}
-		for (MessageDispatchInterceptorBeanInfo messageDispatchInterceptorBeanInfo : messageDispatchInterceptorBeanInfos) {
-			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, messageDispatchInterceptorBeanInfo.type());
-		}
-		for (MessageHandlerInterceptorBeanInfo messageHandlerInterceptorBeanInfo : messageHandlerInterceptorBeanInfos) {
-			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, messageHandlerInterceptorBeanInfo.type());
-		}
-		for (CommandHandlerBeanInfo commandHandlerBeanInfo : commandHandlerBeanInfos) {
-			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, commandHandlerBeanInfo.type());
-		}
-		for (EventHandlerBeanInfo eventHandlerBeanInfo : eventHandlerBeanInfos) {
-			beanScopeValidator = new DependentScopedBeanValidator(beanScopeValidator, eventHandlerBeanInfo.type());
-		}
-		try {
-			beanScopeValidator.validate(beanManager);
-		} catch (final BeanScopeNotValidException beanScopeNotValidException) {
-			afterBeanDiscovery.addDefinitionError(
-					new InjectionException(
-						String.format("'%s' must be defined as '%s' to avoid clashes between instances",
-							beanScopeNotValidException.bean().toString(),
-							beanScopeNotValidException.expectedBeanScoped().getSimpleName())));
-		}
+		final List<BeanScopeValidator> beanScopeValidators = new ArrayList<>(Arrays.asList(new ApplicationScopedBeanValidator(CommandBus.class),
+				new ApplicationScopedBeanValidator(CommandGateway.class),
+				new ApplicationScopedBeanValidator(EventBus.class),
+				new ApplicationScopedBeanValidator(SnapshotTriggerDefinition.class),
+				new ApplicationScopedBeanValidator(TokenStore.class),
+				new ApplicationScopedBeanValidator(TransactionManager.class),
+				new ApplicationScopedBeanValidator(Serializer.class),
+				new ApplicationScopedBeanValidator(EventStorageEngine.class),
+				new ApplicationScopedBeanValidator(EventScheduler.class),
+				new ApplicationScopedBeanValidator(CorrelationDataProvider.class),
+				new ApplicationScopedBeanValidator(MetricRegistry.class)));
+		Stream.of(sagaBeanInfos, messageDispatchInterceptorBeanInfos, messageHandlerInterceptorBeanInfos, commandHandlerBeanInfos, eventHandlerBeanInfos)
+			.flatMap(annotatedTypeInfos -> annotatedTypeInfos.stream())
+			.map(annotatedTypeInfo -> new DependentScopedBeanValidator(annotatedTypeInfo.type()))
+			.forEachOrdered(beanScopeValidators::add);
+		beanScopeValidators.stream()
+			.forEach(beanScopeValidator -> {
+				try {
+					beanScopeValidator.validate(beanManager);
+				} catch (final BeanScopeNotValidException beanScopeNotValidException) {
+					afterBeanDiscovery.addDefinitionError(
+							new InjectionException(
+								String.format("'%s' must be defined as '%s' to avoid clashes between instances",
+									beanScopeNotValidException.bean().toString(),
+									beanScopeNotValidException.expectedBeanScoped().getSimpleName())));
+				}
+			});
 		if (executionContexts.isEmpty()) {
 			// no aggregate root has been defined.
 			// we only want to listen for events for the write part !
@@ -255,36 +222,49 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 		});
 		// Create and setup configurer for each context
 		for (ExecutionContext executionContext : executionContexts) {
-			AxonCdiConfigurer axonCdiConfiguration =
-				new MetricRegistryCdiConfigurer(
-					new AggregatesCdiConfigurer(
-						new CommandHandlersCdiConfigurer(
-							new SagaConfigurationsCdiConfigurer(
-								new EventHandlersCdiConfigurer(
-									new CorrelationDataProviderCdiConfigurer(
-										new ResourceInjectorCdiConfigurer(
-											new TransactionManagerCdiConfigurer(
-												new PlatformTransactionManagerCdiConfigurer(
-													new TokenStoreCdiConfigurer(
-														new SerializerCdiConfigurer(
-															new CommandBusCdiConfigurer(
-																new EmbeddedEventStoreCdiConfigurer(
-																	new ParameterResolverCdiConfigurer(
-																		new AxonCdiConfigurationEntryPoint()))))))))))))));
-			Configurer configurer = axonCdiConfiguration.setUp(DefaultConfigurer.defaultConfiguration(), beanManager, executionContext, fileConfiguration);
+			final Configurer configurer = DefaultConfigurer.defaultConfiguration();
+			Arrays.asList(new ParameterResolverCdiConfigurer(),
+					new EmbeddedEventStoreCdiConfigurer(),
+					new CommandBusCdiConfigurer(),
+					new SerializerCdiConfigurer(),
+					new TokenStoreCdiConfigurer(),
+					new PlatformTransactionManagerCdiConfigurer(),
+					new TransactionManagerCdiConfigurer(),
+					new ResourceInjectorCdiConfigurer(),
+					new CorrelationDataProviderCdiConfigurer(),
+					new EventHandlersCdiConfigurer(),
+					new SagaConfigurationsCdiConfigurer(),
+					new CommandHandlersCdiConfigurer(),
+					new AggregatesCdiConfigurer(),
+					new MetricRegistryCdiConfigurer())
+				.stream()
+				.forEach(cdiConfiguration -> cdiConfiguration.setUp(configurer, beanManager, executionContext, fileConfiguration));
 			// create *configuration* from previous setup configurer
-			Configuration configuration = configurer.buildConfiguration();
+			final Configuration configuration = configurer.buildConfiguration();
 			// Create cdi bean from configuration (repositories, event handlers, command handlers, event schedulers, command gateway)
-			BeansCreationHandler beansCreation =
-				new MetricRegistryBeanCreation(
-					new CommandGatewayBeanCreation(
-						new EventSchedulerBeanCreation(
-							new AggregatesRootRepositoriesBeansCreation(
-								new EventStoreBeanCreation(
-									new BeanCreationEntryPoint())))));
-			beansCreation.create(afterBeanDiscovery, beanManager, executionContext, configuration);
+			Arrays.asList(new EventStoreBeanCreation(),
+					new AggregatesRootRepositoriesBeansCreation(),
+					new EventSchedulerBeanCreation(),
+					new CommandGatewayBeanCreation(),
+					new MetricRegistryBeanCreation())
+				.stream()
+				.forEach(beansCreationHandler -> beansCreationHandler.create(afterBeanDiscovery, beanManager, executionContext, configuration));
 			configurations.add(configuration);
 		}
+	}
+
+	private FileConfiguration readFileConfiguration() {
+		final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+		FileConfiguration fileConfiguration;
+		try {
+			fileConfiguration = mapper.readValue(this.getClass().getResourceAsStream("/configuration.yaml"), YamlConfiguration.class);
+			LOGGER.log(Level.INFO, "Loaded conf:");
+			LOGGER.log(Level.INFO, ReflectionToStringBuilder.toString(fileConfiguration, ToStringStyle.MULTI_LINE_STYLE));
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Unable to load conf - using default configuration: " + e.getMessage());
+			fileConfiguration = new UnavailableConfiguration();
+		}
+		return fileConfiguration;
 	}
 
 	/**

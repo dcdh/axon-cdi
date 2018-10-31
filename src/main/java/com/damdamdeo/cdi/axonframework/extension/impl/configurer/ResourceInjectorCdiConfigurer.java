@@ -9,14 +9,10 @@ import org.axonframework.config.Configurer;
 import com.damdamdeo.cdi.axonframework.extension.impl.discovered.ExecutionContext;
 import com.damdamdeo.cdi.axonframework.support.CdiResourceInjector;
 
-public class ResourceInjectorCdiConfigurer extends AbstractCdiConfiguration {
-
-	public ResourceInjectorCdiConfigurer(final AxonCdiConfigurer original) {
-		super(original);
-	}
+public class ResourceInjectorCdiConfigurer implements AxonCdiConfigurer {
 
 	@Override
-	protected void concreateCdiSetUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws Exception {
+	public void setUp(final Configurer configurer, final BeanManager beanManager, final ExecutionContext executionContext, final FileConfiguration fileConfiguration) throws RuntimeException {
 		Objects.requireNonNull(configurer);
 		Objects.requireNonNull(beanManager);
 		Objects.requireNonNull(executionContext);

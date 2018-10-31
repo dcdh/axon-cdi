@@ -13,13 +13,9 @@ import com.damdamdeo.cdi.axonframework.support.CdiUtils;
 
 public abstract class AbstractScopedBeanValidator implements BeanScopeValidator {
 
-	private final BeanScopeValidator beanScopeValidator;
-
 	private final Class<?> targetClazz;
 
-	public AbstractScopedBeanValidator(final BeanScopeValidator beanScopeValidator,
-			final Class<?> targetClazz) {
-		this.beanScopeValidator = Objects.requireNonNull(beanScopeValidator);
+	public AbstractScopedBeanValidator(final Class<?> targetClazz) {
 		this.targetClazz = Objects.requireNonNull(targetClazz);
 	}
 
@@ -33,7 +29,6 @@ public abstract class AbstractScopedBeanValidator implements BeanScopeValidator 
 						bean.getScope());
 			}
 		}
-		beanScopeValidator.validate(beanManager);
 	}
 
 	protected abstract Class<? extends Annotation> targetScoped();
