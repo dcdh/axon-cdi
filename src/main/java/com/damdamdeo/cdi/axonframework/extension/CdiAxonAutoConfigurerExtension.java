@@ -183,7 +183,11 @@ public class CdiAxonAutoConfigurerExtension implements Extension {
 				new ApplicationScopedBeanValidator(EventScheduler.class),
 				new ApplicationScopedBeanValidator(CorrelationDataProvider.class),
 				new ApplicationScopedBeanValidator(MetricRegistry.class)));
-		Stream.of(sagaBeanInfos, messageDispatchInterceptorBeanInfos, messageHandlerInterceptorBeanInfos, commandHandlerBeanInfos, eventHandlerBeanInfos)
+		Stream.of(messageDispatchInterceptorBeanInfos, messageHandlerInterceptorBeanInfos)
+			.flatMap(annotatedTypeInfos -> annotatedTypeInfos.stream())
+			.map(annotatedTypeInfo -> new ApplicationScopedBeanValidator(annotatedTypeInfo.type()))
+			.forEachOrdered(beanScopeValidators::add);
+		Stream.of(sagaBeanInfos, commandHandlerBeanInfos, eventHandlerBeanInfos)
 			.flatMap(annotatedTypeInfos -> annotatedTypeInfos.stream())
 			.map(annotatedTypeInfo -> new DependentScopedBeanValidator(annotatedTypeInfo.type()))
 			.forEachOrdered(beanScopeValidators::add);
